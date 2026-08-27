@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>青空之下 · 高校青春物语</title>
+<style>
+  :root{
+    --bg:#0e1220; --panel:#1a2138; --panel2:#222b46; --ink:#eaf0ff; --dim:#9aa6c4;
+    --accent:#ff6b9d; --accent2:#6ba8ff; --gold:#ffce6b; --good:#4ade80; --bad:#f87171;
+    --line:#2c3654; --shadow:0 8px 30px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+    display:flex; justify-content:center; align-items:center;
+    background-image:radial-gradient(circle at 20% 10%,#1c2640 0,transparent 45%),
+                     radial-gradient(circle at 85% 90%,#241a38 0,transparent 45%),var(--bg);
+  }
+  #app{width:100%; max-width:520px; min-height:100vh; position:relative; overflow:hidden;
+       background:var(--panel); box-shadow:var(--shadow);}
+  @media(min-width:520px){ #app{border-radius:20px; min-height:88vh; max-height:96vh; margin:2vh auto;} }
+  /* background layer */
+  #bgLayer{position:absolute; inset:0; z-index:0; pointer-events:none;}
+  #bgLayer img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.9) brightness(.6);}
+  #bgLayer .veil{position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,14,28,.35),rgba(10,14,28,.82));}
+  /* main screen */
+  #screen{position:relative; z-index:1; padding:16px 16px 90px;}
+  h1.title{font-size:26px; margin:0 0 6px; letter-spacing:1px;}
+  .sub{color:var(--dim); font-size:13px; margin:0 0 18px;}
+  .card{background:linear-gradient(180deg,rgba(38,46,74,.92),rgba(26,33,56,.94));
+        border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px; box-shadow:var(--shadow);}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .between{display:flex; justify-content:space-between; align-items:center;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:7px;
+       background:var(--panel2); color:var(--ink); border:1px solid var(--line);
+       border-radius:12px; padding:11px 14px; font-size:14px; cursor:pointer; user-select:none;
+       transition:transform .08s ease, filter .12s ease, background .12s;}
+  .btn:hover{filter:brightness(1.12);}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:linear-gradient(135deg,#ff6b9d,#ff4d7e); border-color:transparent; font-weight:600;}
+  .btn.accent{background:linear-gradient(135deg,#6ba8ff,#3d7bff); border-color:transparent; font-weight:600;}
+  .btn.gold{background:linear-gradient(135deg,#ffce6b,#f0a020); color:#3a2400; border-color:transparent; font-weight:600;}
+  .btn.ghost{background:transparent;}
+  .btn.sm{padding:7px 10px; font-size:12.5px; border-radius:10px;}
+  .btn:disabled{opacity:.4; cursor:not-allowed; filter:none;}
+  .btn.block{width:100%;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;}
+  .grid4{display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:9px;}
+  /* HUD */
+  #hud{position:sticky; top:0; z-index:5; background:linear-gradient(180deg,rgba(14,18,32,.98),rgba(14,18,32,.86));
+       border-bottom:1px solid var(--line); padding:12px 16px; margin:-16px -16px 16px; backdrop-filter:blur(6px);}
+  .hud-top{display:flex; align-items:center; justify-content:space-between;}
+  .hud-name{font-weight:700; font-size:16px;}
+  .hud-name .gen{font-size:11px; color:var(--dim); font-weight:500; margin-left:6px;}
+  .hud-sub{color:var(--dim); font-size:12px; margin-top:2px;}
+  .bar-wrap{background:#0b0f1e; border-radius:8px; height:9px; overflow:hidden; flex:1;}
+  .bar{height:100%; border-radius:8px; transition:width .4s ease;}
+  .bar.sta{background:linear-gradient(90deg,#4ade80,#22c55e);}
+  .bar.mood{background:linear-gradient(90deg,#ffce6b,#f59e0b);}
+  .chip{display:inline-flex; align-items:center; gap:4px; background:var(--panel2);
+        border:1px solid var(--line); border-radius:8px; padding:3px 8px; font-size:12px;}
+  .energy{display:flex; gap:4px;}
+  .energy i{width:10px; height:10px; border-radius:50%; background:var(--gold); display:block;}
+  .energy i.off{background:#2c3654;}
+  /* portrait */
+  .portrait{display:flex; flex-direction:column; align-items:center;}
+  .portrait svg{width:100%; height:auto; max-width:150px; filter:drop-shadow(0 6px 14px rgba(0,0,0,.4));}
+  .portrait .pname{font-weight:700; margin-top:6px; font-size:14px;}
+  .portrait .prole{color:var(--dim); font-size:11px;}
+  /* attr list */
+  .attr{display:flex; align-items:center; justify-content:space-between; gap:8px;
+        background:var(--panel2); border:1px solid var(--line); border-radius:10px; padding:8px 10px;}
+  .attr .k{font-size:13px;} .attr .v{font-weight:700; font-size:15px; color:var(--gold);}
+  .attr.selectable{cursor:pointer; transition:transform .08s, border-color .12s;}
+  .attr.selectable:hover{border-color:var(--accent);}
+  .attr.selectable.sel{border-color:var(--accent); background:rgba(255,107,157,.16); box-shadow:0 0 0 1px var(--accent);}
+  .attr.selectable.lock{opacity:.35; cursor:not-allowed;}
+  /* dialogue box */
+  .dlg{position:relative; background:linear-gradient(180deg,rgba(20,26,46,.96),rgba(16,20,38,.96));
+       border:1px solid var(--line); border-radius:16px; padding:16px; margin-bottom:14px;}
+  .dlg .who{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .dlg .who .avatar{width:44px; height:44px; border-radius:50%; overflow:hidden; background:var(--panel2); border:2px solid var(--accent); flex:0 0 auto;}
+  .dlg .who .avatar svg{width:100%; height:100%;}
+  .dlg .who .nm{font-weight:700; font-size:15px;}
+  .dlg .who .rl{color:var(--dim); font-size:11px;}
+  .dlg .txt{font-size:15px; line-height:1.75; color:#eef2ff; min-height:60px;}
+  .dlg .txt .hl{color:var(--accent); font-weight:600;}
+  .dlg .tag{color:var(--gold);}
+  .choices{margin-top:12px; display:flex; flex-direction:column; gap:9px;}
+  /* ending */
+  .ending-box{text-align:center;}
+  .ending-box .big{font-size:15px; line-height:1.9; color:#eef2ff; text-align:left;}
+  .badge{display:inline-block; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:1px;}
+  .badge.love{background:linear-gradient(135deg,#ff6b9d,#ff4d7e);}
+  .badge.friend{background:linear-gradient(135deg,#6ba8ff,#3d7bff);}
+  .badge.school{background:linear-gradient(135deg,#ffce6b,#f0a020); color:#3a2400;}
+  /* nav bottom */
+  #nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:520px;
+       display:flex; gap:8px; padding:10px 12px; background:linear-gradient(0deg,rgba(10,13,24,.97),rgba(10,13,24,.7));
+       border-top:1px solid var(--line); z-index:20; backdrop-filter:blur(8px);}
+  #nav .btn{flex:1; padding:10px 6px; font-size:13px;}
+  .scroll{max-height:58vh; overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  .scroll::-webkit-scrollbar{width:5px;} .scroll::-webkit-scrollbar-thumb{background:var(--line); border-radius:5px;}
+  .float{animation:floaty 3.2s ease-in-out infinite;}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .fade{animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+  .hint{color:var(--dim); font-size:12px; line-height:1.6;}
+  .small{font-size:12px; color:var(--dim);}
+  .divider{height:1px; background:var(--line); margin:12px 0;}
+  input[type=text]{width:100%; background:#0b0f1e; border:1px solid var(--line); color:var(--ink);
+       border-radius:12px; padding:13px 14px; font-size:16px; outline:none;}
+  input[type=text]:focus{border-color:var(--accent);}
+  .heart{color:var(--accent);}
+  .aff-bar{height:6px; background:#0b0f1e; border-radius:4px; overflow:hidden; flex:1;}
+  .aff-bar .fill{height:100%; background:linear-gradient(90deg,#ff6b9d,#ff4d7e); border-radius:4px; transition:width .4s;}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="bgLayer"></div>
+  <div id="screen"></div>
+</div>
+<div id="nav"></div>
+
+<script>
+/* =========================================================================
+   青空之下 · 高校青春物语  (single-file galgame)
+   时间轴：高中三年 / 每周行动点 / 属性驱动剧情 / 恋爱+友情+高考多重结局
+========================================================================= */
+
+/* ---------- 常量 ---------- */
+const ATTRS = [
+  {k:'si',  n:'思维',   icon:'🧠'},
+  {k:'xue', n:'学习能力',icon:'📖'},
+  {k:'xzl', n:'性张力', icon:'✨'},
+  {k:'wy',  n:'文艺值', icon:'🎨'},
+  {k:'jl',  n:'纪律',   icon:'📏'},
+  {k:'yz',  n:'颜值',   icon:'💫'},
+  {k:'ym',  n:'幽默',   icon:'😄'},
+  {k:'tn',  n:'体能',   icon:'💪'},
+  {k:'ld',  n:'领导力', icon:'👑'},
+  {k:'jj',  n:'交际',   icon:'🤝'},
+  {k:'yy',  n:'语言',   icon:'💬'},
+  {k:'la',  n:'恋爱',   icon:'💘'},
+  {k:'wl',  n:'武力值', icon:'⚔️'},
+  {k:'wc',  n:'文采',   icon:'✍️'},
+];
+const ATTR_KEYS = ATTRS.map(a=>a.k);
+const BGS = {
+  classroom: 'bg/classroom.png',
+  corridor:  'bg/corridor.webp',
+  playground:'bg/playground.webp',
+  rooftop:   'bg/rooftop.jpg',
+};
+
+/* ---------- 角色数据 (20人) ---------- */
+const CHARACTERS = [
+  {id:'wangzhao', name:'王昭', gender:'m', role:'班长',
+   sprite:{hair:'#232338',style:'short',eye:'#3a3f58',acc:'glasses',tone:'#f6d8b2',cloth:'#3b5a8f',mouth:'calm'},
+   desc:'三年一班的班长，成绩优异，责任感强到近乎古板。嘴硬心软，是全班最可靠的人。',
+   like:'认真负责、有目标感的人。', hobby:'制定学习计划表',
+   lines:['自习课要保持安静，你懂的吧？','你的作业我检查过了，第三题思路有点绕。','有困难就找我，班长不是白当的。'],
+   romance:false,
+   date:['放学后一起值日，他帮你把最累的活都揽了过去。','图书馆里他小声给你讲题，两个人的头靠得很近。'],
+   confess:'放学的天台，晚霞把他的脸映得发红："我想……以后也一直这样，和你一起值日、一起努力。"',
+   ending:'你和王昭考进了同一所大学。他依旧帮你规划每一门课，只是这一次，握着你的手再也没有松开。'},
+  {id:'songqiu', name:'宋秋', gender:'m', role:'文艺少年',
+   sprite:{hair:'#5b3a8c',style:'long',eye:'#7a5cc0',acc:'cap',tone:'#f5d7b3',cloth:'#8a6fbf',mouth:'gentle'},
+   desc:'画室里最能待得住的人，忧郁而温柔的文艺少年。话不多，但他的画会说话。',
+   like:'懂艺术、能安静听他说心事的人。', hobby:'水彩写生',
+   lines:['风里有点桂花的味道，你闻到了吗？','这幅画……送你。它让我想起了你。','有时候，沉默比语言更诚实。'],
+   romance:false,
+   date:['周末一起去美术馆，他给你讲解每一幅画的笔触。','黄昏的河堤，他支起画架，画下你被风吹乱的发。'],
+   confess:'画展散场，他把一张画递给你——画里是你。他轻声说："我画过很多人，只有你，我画到不想停笔。"',
+   ending:'你成了他画里唯一不变的主角。毕业后的画展上，他当着所有人的面，把最温柔的告白画成了压轴之作。'},
+  {id:'tianjia', name:'田嘉', gender:'m', role:'校草',
+   sprite:{hair:'#dcdcec',style:'slick',eye:'#8fb8d8',acc:'none',tone:'#fae1c1',cloth:'#a8c4d8',mouth:'smile'},
+   desc:'全校公认的校草，走到哪里都是焦点。看似高冷，其实待人温柔，只是不会拒绝人。',
+   like:'真诚、不刻意讨好他的人。', hobby:'篮球',
+   lines:['又收到一封信……唉，你帮我看看该不该回。','别紧张，我又不是什么大明星。','和你待着，感觉比哪儿都轻松。'],
+   romance:true,
+   date:['球场边，他投进一个三分后朝你眨了眨眼。','天台，他把校服外套披在你肩上，说风大。'],
+   confess:'操场熄灯后，只有月光。他难得认真："所有人都在看我，可我只看得到你。"',
+   ending:'校草为你在毕业典礼上单膝下跪，全场尖叫。原来他的温柔，一直只留给了你一个人。'},
+  {id:'liuhongshu', name:'刘宏书', gender:'m', role:'体育委员',
+   sprite:{hair:'#2a2a2a',style:'spiky',eye:'#4a3a2a',acc:'headband',tone:'#e8b98a',cloth:'#d86a3a',mouth:'grin'},
+   desc:'精力充沛的体育委员，嗓门大、讲义气，全校的运动会记录有一半写着他的名字。',
+   like:'运动神经好、能一起流汗的人。', hobby:'田径、球类',
+   lines:['走走走，课间去操场跑两圈！','男子汉就该用汗水说话！','下次运动会，我给你留了最佳位置！'],
+   romance:false,
+   lines2:['运动会我们一起拿了接力第一，这兄弟我认定了！']},
+  {id:'qinyang', name:'秦阳', gender:'m', role:'阳光少年',
+   sprite:{hair:'#c08a3a',style:'short',eye:'#5a8a3a',acc:'none',tone:'#f8d8b0',cloth:'#e8a83a',mouth:'smile'},
+   desc:'像他的名字一样温暖明亮，永远笑着的邻家男孩。热心肠，是大家的心灵充电站。',
+   like:'乐观向上、爱笑的人。', hobby:'拍照、种花',
+   lines:['今天天气真好，不出去晒晒太阳吗？','笑一个，烦恼就会少一点。','我给你带了我妈做的点心，尝尝。'],
+   romance:true,
+   date:['他带你逛校园的后花园，认识每一株他亲手种的花。','午休，他把耳机分你一半，分享一首很温暖的歌。'],
+   confess:'樱花树下，他紧张地背着手："从遇见你开始，我每天的心情都是晴天。可以做我女朋友吗？"',
+   ending:'你和秦阳的相册里塞满了春天的合照。他笑着说，以后要和你种满一整个阳台的花。'},
+  {id:'lijing', name:'李静', gender:'f', role:'纪律委员',
+   sprite:{hair:'#1a1a2a',style:'bun',eye:'#3a4a5a',acc:'glasses',tone:'#f7d8b5',cloth:'#3a6a4a',mouth:'serious'},
+   desc:'一丝不苟的纪律委员，对规则执着到可爱。其实私下里会偷偷关心每一个人。',
+   like:'自律、有分寸感的人。', hobby:'整理、做计划',
+   lines:['违反校规的事，想都别想。','……我不是在凶你，我是为你好。','你的桌洞太乱了，放学我帮你理理。'],
+   romance:true,
+   date:['她手把手教你整理错题本，一板一眼的样子很可爱。','自习课上，她递来一张纸条，写着"认真点"。'],
+   confess:'值日结束后，她红着脸递给你一枚自己做的书签："我想管你……管一辈子。"',
+   ending:'李静依旧会管着你的一言一行，可那副严厉的模样里，藏满了只属于你的温柔。'},
+  {id:'lipu', name:'利普', gender:'f', role:'学霸',
+   sprite:{hair:'#2a3a6a',style:'long',eye:'#3a5ac0',acc:'headband',tone:'#f6d7b0',cloth:'#3a5a8a',mouth:'calm'},
+   desc:'常年年级第一的学霸，冷静聪慧，像深海一样沉稳。对没弄懂的事绝不罢休。',
+   like:'聪明、能跟上她思路的人。', hobby:'解难题、天文',
+   lines:['这道题有三种解法，你要听哪种？','专注的时候，世界会安静下来。','今晚有流星雨，一起去看吗？'],
+   romance:true,
+   date:['天文社的望远镜旁，她指着星空给你讲星座。','深夜自习室，她塞给你一罐温热的咖啡。'],
+   confess:'流星划过夜空时，她轻声说："许愿太晚了，我直接问吧——你喜欢我吗？"',
+   ending:'你们一起考入顶尖学府。在图书馆的星空投影下，她第一次笑得像个普通女孩。'},
+  {id:'ajie', name:'阿杰', gender:'m', role:'学神',
+   sprite:{hair:'#9a9aa8',style:'messy',eye:'#6a6a78',acc:'glasses',tone:'#f0d0b0',cloth:'#7a7a88',mouth:'flat'},
+   desc:'不听课也能满分的学神，永远一副睡不醒的样子。话少到像在省电，但关键时候靠得住。',
+   like:'安静、不打扰他发呆的人。', hobby:'睡觉、下棋',
+   lines:['……（他只是在发呆）','这题，看一眼就会了。','困了，借你肩膀用用……算了。'],
+   romance:false,
+   lines2:['全校数学竞赛，我们包揽前两名，挺默契的。']},
+  {id:'jiaozhu', name:'教主', gender:'m', role:'大哥',
+   sprite:{hair:'#7a1a1a',style:'slick',eye:'#9a2a2a',acc:'none',tone:'#f2c8a8',cloth:'#8a2a2a',mouth:'smirk'},
+   desc:'校内的风云人物，讲义气、有手腕，大家都叫他"教主"。嘴上狠，其实最护短。',
+   like:'有骨气、不卑不亢的人。', hobby:'武术、下馆子',
+   lines:['谁欺负你，报我名字。','这顿我请，别跟我抢。','跟着我，保证没人敢动你。'],
+   romance:false,
+   lines2:['你这个人，讲义气，我教主交你这个朋友！']},
+  {id:'wangwen', name:'王雯', gender:'f', role:'班花',
+   sprite:{hair:'#d86aa0',style:'long',eye:'#c05a90',acc:'ribbon',tone:'#fbe0c8',cloth:'#e88ab8',mouth:'smile'},
+   desc:'温柔漂亮的班花，性格和外表一样软。笑容有让人安心的魔力，是很多人的白月光。',
+   like:'体贴、会照顾人的人。', hobby:'烘焙、养猫',
+   lines:['我烤了小饼干，你要不要尝尝？','累了吗？我陪你坐一会儿吧。','今天也要开开心心的呀。'],
+   romance:true,
+   date:['她带你去喂学校里的流浪猫，动作轻柔得让人心动。','家政课，她把烤好的第一块饼干递给你。'],
+   confess:'夕阳下，她绞着手指，声音软软的："其实……我一直偷偷喜欢着你。"',
+   ending:'王雯每天都会为你准备点心，把日子过成了甜味。她说，最幸福的事就是看你笑。'},
+  {id:'zhangxuan', name:'张玄', gender:'m', role:'运动健将',
+   sprite:{hair:'#1a1a1a',style:'spiky',eye:'#4a3a2a',acc:'headband',tone:'#e0a878',cloth:'#2a5a8a',mouth:'grin'},
+   desc:'田径队的王牌，爆发力惊人。直来直去，认定的事九头牛都拉不回。',
+   like:'不服输、有韧劲的人。', hobby:'短跑、健身',
+   lines:['跟我比一场，赢了请你喝水。','爆发力是练出来的，想学吗？','终点线就在前面，冲啊！'],
+   romance:true,
+   date:['他教你短跑起跑姿势，认真得像个教练。','校外的篮球场，你们斗牛到天黑。'],
+   confess:'他满头大汗，眼神却发亮："我这人不会说话……就一句，我想和你一直跑下去。"',
+   ending:'张玄成了你的专属教练，也成了你人生的同行者。你们一起冲向每一个终点。'},
+  {id:'kongjing', name:'孔菁', gender:'m', role:'理科学霸',
+   sprite:{hair:'#2a6a6a',style:'short',eye:'#3a8a8a',acc:'glasses',tone:'#f5d6b0',cloth:'#3a7a7a',mouth:'flat'},
+   desc:'理科竞赛的常胜将军，冷静到近乎冷漠。实际上只是不擅长表达，内心很柔软。',
+   like:'逻辑清晰、认真思考的人。', hobby:'编程、机器人',
+   lines:['按逻辑推理，你这步走错了。','我做了个小程序，你要不要试试？','……谢谢。我其实，挺高兴的。'],
+   romance:false,
+   lines2:['机器人社团的参赛作品，有你一半功劳。']},
+  {id:'cuikai', name:'崔凯', gender:'m', role:'搞笑学霸',
+   sprite:{hair:'#e8c03a',style:'messy',eye:'#6a5a1a',acc:'none',tone:'#f6d8b0',cloth:'#e8c03a',mouth:'grin'},
+   desc:'成绩好又没个正形，能把全班逗得前仰后合。看似吊儿郎当，其实聪明得很。',
+   like:'幽默、接得住他梗的人。', hobby:'讲段子、玩魔方',
+   lines:['来来来，给你讲个刚出炉的冷笑话。','学习嘛，笑着笑着就会了。','别愁了，笑一个，我给你表演个绝活！'],
+   romance:false,
+   lines2:['和你一唱一和，全班都笑翻了，咱俩简直是黄金搭档！']},
+  {id:'dafen', name:'达芬', gender:'m', role:'社恐学神',
+   sprite:{hair:'#3a3a4a',style:'hood',eye:'#5a6a7a',acc:'hoodie',tone:'#f2d0b0',cloth:'#4a4a5a',mouth:'shy'},
+   desc:'戴着兜帽、总缩在角落的天才。一开口就脸红，却在数学物理上天赋异禀。',
+   like:'不强迫他说话、愿意慢慢接近的人。', hobby:'拼图、冥想',
+   lines:['……（他朝你点了点头）','那个……这道题，我、我可以讲。','谢谢你……不嫌我话少。'],
+   romance:false,
+   lines2:['只有你，能让我在人群里不紧张。']},
+  {id:'dashi', name:'大师', gender:'m', role:'沉稳学长',
+   sprite:{hair:'#5a4a2a',style:'slick',eye:'#4a3a2a',acc:'none',tone:'#e8c8a0',cloth:'#6a5a3a',mouth:'calm'},
+   desc:'为人沉稳，像定海神针一样让人安心。讲话慢条斯理，却总能一针见血。',
+   like:'稳重、懂得感恩的人。', hobby:'下棋、品茶',
+   lines:['莫慌，事情总有解法。','年轻人，泡杯茶，慢慢说。','你比同龄人稳重，很难得。'],
+   romance:false,
+   lines2:['与你对弈，棋逢对手，痛快。']},
+  {id:'paozi', name:'狍子', gender:'m', role:'沙雕同学',
+   sprite:{hair:'#3a7a3a',style:'messy',eye:'#5a8a3a',acc:'none',tone:'#f2d0a8',cloth:'#5a8a3a',mouth:'goofy'},
+   desc:'全班的气氛担当，总能一本正经地做出最离谱的事。他的快乐会传染。',
+   like:'一起疯、一起闹的人。', hobby:'恶作剧、收集冷知识',
+   lines:['你猜我刚才干了啥？保证你想不到！','人生嘛，开心最重要！','别走，再陪我玩会儿！'],
+   romance:false,
+   lines2:['和你一起搞事，每天都像过节！']},
+  {id:'fukes', name:'福克斯', gender:'m', role:'狐狸系男神',
+   sprite:{hair:'#d86a2a',style:'spiky',eye:'#c06a2a',acc:'earring',tone:'#f6d0a8',cloth:'#d86a3a',mouth:'smirk'},
+   desc:'狡黠迷人的狐狸系男生，说话总留三分。看似玩世不恭，实则洞察人心。',
+   like:'聪明、能看穿他小把戏的人。', hobby:'魔术、交际',
+   lines:['哟，被我看穿心事了？','跟我玩个游戏怎么样？输的人答应对方一件事。','你挺有意思的，我记住你了。'],
+   romance:true,
+   date:['他给你表演了个小魔术，变出一朵纸玫瑰。','天台，他斜靠在栏杆上，聊了很多没对别人说过的话。'],
+   confess:'他难得收起玩味，语气认真："我骗过很多人，但这次是认真的——我喜欢你。"',
+   ending:'狐狸最终心甘情愿被你收服。他说，输给你，是他这辈子最心甘情愿的一场游戏。'},
+  {id:'keke', name:'珂珂', gender:'f', role:'才女',
+   sprite:{hair:'#e88ab8',style:'twintails',eye:'#c05a8a',acc:'ribbon',tone:'#fbe2cc',cloth:'#f0a0c0',mouth:'gentle'},
+   desc:'文笔动人的才女，校刊的主笔。心思细腻，能用文字写出别人说不出的心事。',
+   like:'有故事、愿意分享感受的人。', hobby:'写作、读诗',
+   lines:['你的故事，可以讲给我听吗？我想写下来。','文字会记住那些易逝的心情。','这一页，我写的是你。'],
+   romance:true,
+   date:['文学社里，她给你念自己新写的小诗。','樱花树下，她抱着笔记本，记录下和你一起的每个瞬间。'],
+   confess:'她把一本写满的笔记本递给你，扉页写着："所有关于你的字句，都在这里了。"',
+   ending:'珂珂把你们的故事写成了校刊连载，甜倒了全校。她说，你才是她最好的灵感。'},
+  {id:'dag', name:'大G', gender:'m', role:'硬汉',
+   sprite:{hair:'#3a3a3a',style:'spiky',eye:'#4a4a4a',acc:'scar',tone:'#d8a878',cloth:'#3a3a3a',mouth:'flat'},
+   desc:'沉默寡言的硬汉，肌肉和拳头都很硬。话不多，但说到做到，极其可靠。',
+   like:'真诚、不耍花招的人。', hobby:'格斗、健身',
+   lines:['……嗯。（他点头表示同意）','需要帮忙就说。','这条街，以后我罩着你。'],
+   romance:false,
+   lines2:['一起扛过事，就是过命的交情。']},
+  {id:'dingjinbo', name:'丁金波', gender:'m', role:'热血少年',
+   sprite:{hair:'#c02a2a',style:'spiky',eye:'#c02a2a',acc:'headband',tone:'#f0c8a0',cloth:'#c02a2a',mouth:'grin'},
+   desc:'浑身是劲的热血少年，梦想是成为最强的男人。冲动但纯粹，像一团燃烧的火。',
+   like:'有梦想、敢拼搏的人。', hobby:'格斗、热血漫画',
+   lines:['燃烧吧！青春！','我要成为最强！你也一起！','是男人就来痛快地打一架（切磋）！'],
+   romance:false,
+   lines2:['和你并肩，我感觉自己燃起来了！']},
+];
+
+/* 属性数据 (si思维 xue学习 xzl性张力 wy文艺 jl纪律 yz颜值 ym幽默 tn体能 ld领导 jj交际 yy语言 la恋爱 wl武力 wc文采) */
+const CHARACTER_ATTRS = {
+  wangzhao:{si:96,xue:95,xzl:84,wy:82,jl:78,yz:85,ym:92,tn:90,ld:94,jj:96,yy:95,la:82,wl:89,wc:88},
+  songqiu:{si:90,xue:88,xzl:85,wy:99,jl:80,yz:90,ym:88,tn:80,ld:83,jj:91,yy:90,la:86,wl:83,wc:93},
+  tianjia:{si:95,xue:86,xzl:96,wy:80,jl:71,yz:96,ym:90,tn:82,ld:91,jj:93,yy:96,la:93,wl:90,wc:87},
+  liuhongshu:{si:84,xue:92,xzl:87,wy:80,jl:80,yz:91,ym:89,tn:88,ld:83,jj:93,yy:85,la:87,wl:95,wc:81},
+  qinyang:{si:90,xue:87,xzl:88,wy:90,jl:87,yz:87,ym:85,tn:84,ld:84,jj:90,yy:87,la:90,wl:88,wc:84},
+  lijing:{si:87,xue:95,xzl:85,wy:88,jl:97,yz:85,ym:82,tn:76,ld:92,jj:91,yy:90,la:90,wl:73,wc:88},
+  lipu:{si:91,xue:96,xzl:91,wy:86,jl:90,yz:88,ym:80,tn:78,ld:85,jj:84,yy:89,la:82,wl:83,wc:89},
+  ajie:{si:98,xue:99,xzl:80,wy:70,jl:82,yz:78,ym:75,tn:86,ld:72,jj:74,yy:82,la:66,wl:90,wc:83},
+  jiaozhu:{si:92,xue:89,xzl:83,wy:72,jl:55,yz:82,ym:78,tn:90,ld:88,jj:80,yy:80,la:78,wl:91,wc:84},
+  wangwen:{si:93,xue:90,xzl:88,wy:88,jl:92,yz:91,ym:82,tn:70,ld:80,jj:88,yy:90,la:90,wl:75,wc:89},
+  zhangxuan:{si:94,xue:91,xzl:92,wy:80,jl:70,yz:86,ym:82,tn:89,ld:80,jj:84,yy:82,la:88,wl:91,wc:88},
+  kongjing:{si:96,xue:90,xzl:89,wy:78,jl:88,yz:80,ym:76,tn:82,ld:79,jj:82,yy:85,la:76,wl:90,wc:87},
+  cuikai:{si:96,xue:92,xzl:91,wy:76,jl:84,yz:83,ym:85,tn:80,ld:78,jj:86,yy:83,la:85,wl:83,wc:84},
+  dafen:{si:96,xue:97,xzl:73,wy:75,jl:90,yz:72,ym:68,tn:84,ld:70,jj:70,yy:78,la:60,wl:90,wc:86},
+  dashi:{si:95,xue:95,xzl:83,wy:82,jl:85,yz:79,ym:80,tn:78,ld:74,jj:80,yy:84,la:72,wl:83,wc:87},
+  paozi:{si:93,xue:94,xzl:79,wy:74,jl:80,yz:76,ym:90,tn:82,ld:68,jj:82,yy:80,la:70,wl:87,wc:83},
+  fukes:{si:94,xue:95,xzl:90,wy:84,jl:82,yz:85,ym:84,tn:83,ld:82,jj:90,yy:88,la:87,wl:85,wc:89},
+  keke:{si:90,xue:92,xzl:90,wy:93,jl:88,yz:89,ym:82,tn:72,ld:76,jj:86,yy:92,la:85,wl:78,wc:92},
+  dag:{si:89,xue:90,xzl:73,wy:68,jl:66,yz:80,ym:74,tn:92,ld:70,jj:76,yy:74,la:64,wl:93,wc:80},
+  dingjinbo:{si:88,xue:87,xzl:60,wy:70,jl:72,yz:74,ym:72,tn:90,ld:72,jj:74,yy:76,la:58,wl:92,wc:83},
+};
+CHARACTERS.forEach(c=>{ c.attrs = CHARACTER_ATTRS[c.id]; });
+
+/* 角色专属剧情（按好感度解锁，社交偶遇时概率触发） */
+const CHARACTER_STORIES = {
+  // 女主（可攻略）
+  lijing:[
+    {min:30, text:`值日结束，李静递给你一枚亲手做的书签，写着「天道酬勤」。她别过脸：「不是特意给你的。」`},
+    {min:55, text:`你发现李静在偷偷帮你整理错题本。被你撞见后，她耳尖通红，慌慌张张地说自己只是在检查纪律。`},
+    {min:75, text:`大扫除时李静踩空了凳子，你一把扶住她。她靠在你怀里好一会儿，才小声说了句「谢谢」。`},
+  ],
+  lipu:[
+    {min:30, text:`利普拉你去了天文社，把望远镜让给你看土星环。「宇宙这么大，我们的烦恼就显得很小了。」`},
+    {min:55, text:`深夜自习室，利普塞给你一罐温热的咖啡，说熬夜伤身，但陪你一起熬就没关系。`},
+    {min:75, text:`流星雨那晚，利普靠在围栏上轻声问你：「如果时间能停在这一刻，你会愿意吗？」`},
+  ],
+  wangwen:[
+    {min:30, text:`王雯带你去看校园里那只怀孕的流浪猫，她的眼神温柔得能滴出水来。`},
+    {min:55, text:`家政课上，王雯把烤得最完美的第一块饼干递给你，笑着说「只给你」。`},
+    {min:75, text:`王雯说，她希望每天都能和你一起回家。说完自己先红了脸，小声补了句「开玩笑的啦」。`},
+  ],
+  keke:[
+    {min:30, text:`珂珂把你写进了校刊的散文里，用了一个很好听的化名。她说，这样你就永远留在纸上了。`},
+    {min:55, text:`文学社里，珂珂给你念她新写的小诗，念到一半突然停下，说「剩下的，只想给你一个人听」。`},
+    {min:75, text:`珂珂把一本写满的笔记本塞给你，扉页写着「所有关于你的字句，都在这里了」。`},
+  ],
+  // 男主（可攻略）
+  tianjia:[
+    {min:30, text:`田嘉在球场边把最后一口水让给你，说「校草也要照顾朋友的，尤其是你」。`},
+    {min:55, text:`田嘉偷偷告诉你，其实收到那么多情书他很苦恼，只有和你待着才觉得轻松。`},
+    {min:75, text:`田嘉说，他其实很羡慕你——「因为你可以做自己，而我一直在扮演大家期待的样子。直到遇见你。」`},
+  ],
+  qinyang:[
+    {min:30, text:`秦阳带你去学校后花园，指着一株刚冒芽的向日葵说「这是你种的，我帮你浇了水」。`},
+    {min:55, text:`午休时，秦阳把耳机分你一半，分享了一首很温暖的歌。他说「这首歌像你」。`},
+    {min:75, text:`秦阳说，他收集了一整年的夕阳照片，每一张都想发给你看。「所以，别再让我一个人看夕阳了。」`},
+  ],
+  zhangxuan:[
+    {min:30, text:`张玄教你短跑起跑姿势，认真得像个专业教练，末了说「你很有天赋」。`},
+    {min:55, text:`张玄说，他每天坚持训练，是想在下一次比赛里，让你在观众席看到最闪光的他。`},
+    {min:75, text:`张玄满头大汗地跑来，说「我想清楚了，终点线那边，我要拉着你一起冲过去」。`},
+  ],
+  fukes:[
+    {min:30, text:`福克斯给你变了个小魔术，从你耳后「变」出一朵纸玫瑰。「送你的，别多想。」`},
+    {min:55, text:`福克斯说，他玩世不恭只是保护色，其实很怕被认真对待，也很怕认真。`},
+    {min:75, text:`福克斯难得严肃：「我骗过很多人，但对你，我想说真话。你愿意听吗？」`},
+  ],
+  // 挚友线
+  wangzhao:[
+    {min:30, text:`王昭把下周的班级值日表给你看，说「按计划来，不会乱的」。`},
+    {min:60, text:`王昭说，他当班长三年，最放心的就是有你这样靠谱的同学。`},
+  ],
+  songqiu:[
+    {min:30, text:`宋秋拉你看他的新画。画里是黄昏的操场，右下角有一个很小的人影，他偷偷告诉你「那是你」。`},
+    {min:60, text:`宋秋说，他以后想当一名画家，把你画进他最重要的那幅毕业作品里。`},
+  ],
+  liuhongshu:[
+    {min:30, text:`刘宏书拉着你晨跑，说「男子汉的一天，就该从汗水开始！」`},
+    {min:60, text:`运动会上，刘宏书把接力棒交到你手上时，喊了句「交给你了，兄弟！」`},
+  ],
+  ajie:[
+    {min:30, text:`阿杰难得没睡觉，拉着你下了一盘棋。赢了之后，他罕见地笑了：「你挺有意思。」`},
+    {min:60, text:`阿杰说，全校他只愿意和你多说话，因为你「不吵，也不装懂」。`},
+  ],
+  jiaozhu:[
+    {min:30, text:`教主请你下了顿馆子，说「跟我混，饿不着你」。`},
+    {min:60, text:`教主认真地说：「以后不管你去哪儿，只要开口，我教主一定到。」`},
+  ],
+  kongjing:[
+    {min:30, text:`孔菁给你看他做的小机器人，说「它是我唯一不嫌吵的朋友，现在加上你」。`},
+    {min:60, text:`机器人比赛拿了奖，孔菁把奖牌递给你看，说「这里有你一半功劳」。`},
+  ],
+  cuikai:[
+    {min:30, text:`崔凯给你讲了个冷笑话，你没笑，他反而笑趴了：「你的表情比笑话还好笑！」`},
+    {min:60, text:`崔凯说，以后要当个喜剧演员，到时候第一张票一定送给你。`},
+  ],
+  dafen:[
+    {min:30, text:`达芬鼓起勇气，用极小的声音给你讲了一道难题。讲完他如释重负地松了口气。`},
+    {min:60, text:`达芬说，在人群里他只敢站你旁边，「因为你能让我不那么紧张」。`},
+  ],
+  dashi:[
+    {min:30, text:`大师泡了一壶茶请你喝，慢悠悠地说「年轻人，急什么」。`},
+    {min:60, text:`大师说，你身上有股难得的定力，他愿意和你做一辈子的棋友。`},
+  ],
+  paozi:[
+    {min:30, text:`狍子神秘兮兮地给你看他的「旷世发明」——一台用橡皮筋驱动的纸飞机发射器。`},
+    {min:60, text:`狍子说，青春就该和你这样的朋友一起，把每一天都过成段子。`},
+  ],
+  dag:[
+    {min:30, text:`大G二话不说帮你搬了最重的箱子，只留了句「下次叫我」。`},
+    {min:60, text:`大G说，别看他话少，真遇到事儿，他永远是第一个冲上前的人。`},
+  ],
+  dingjinbo:[
+    {min:30, text:`丁金波拉着你切磋，被摔了个跟头还哈哈大笑：「痛快！再来！」`},
+    {min:60, text:`丁金波说，他的梦想是成为最强，但「最强的路上，得有你这个伙伴」。`},
+  ],
+};
+CHARACTERS.forEach(c=>{ c.stories = CHARACTER_STORIES[c.id] || []; });
+
+const BY_ID = Object.fromEntries(CHARACTERS.map(c=>[c.id,c]));
+const FEMALES = CHARACTERS.filter(c=>c.gender==='f');
+const MALES = CHARACTERS.filter(c=>c.gender==='m');
+
+/* ---------- 立绘生成器 (SVG 手绘, 风格化区分) ---------- */
+function portraitSVG(c, size){
+  const s = c.sprite;
+  const hair=s.hair, eye=s.eye, acc=s.acc, tone=s.tone, cloth=s.cloth, style=s.style, mouth=s.mouth;
+  const fem = c.gender==='f';
+  // 脸部高光肤色
+  const toneDark = shade(tone,-18);
+  let hairBack='', hairFront='', extra='', lashes='';
+  // 后发(长发/马尾/双马尾)
+  if(style==='long'){ hairBack = `<path d="M34 46 C30 82 38 100 60 100 C82 100 90 82 86 46 Z" fill="${hair}"/>`; }
+  else if(style==='ponytail'){ hairBack = `<path d="M34 46 C30 76 38 96 60 96 C82 96 90 76 86 46 Z" fill="${hair}"/>`; extra = `<path d="M84 46 C100 58 102 82 96 96 C90 84 88 66 84 46 Z" fill="${hair}"/>`; }
+  else if(style==='twintails'){ hairBack = `<path d="M30 46 C26 78 34 98 56 98 C46 80 44 60 44 46 Z" fill="${hair}"/><path d="M90 46 C94 78 86 98 64 98 C74 80 76 60 76 46 Z" fill="${hair}"/>`; extra = `<circle cx="30" cy="44" r="7" fill="${hair}"/><circle cx="90" cy="44" r="7" fill="${hair}"/>`; }
+  else if(style==='bun'){ hairBack = `<circle cx="60" cy="22" r="11" fill="${hair}"/>`; }
+  else if(style==='hood'){ hairBack = `<path d="M28 50 C26 78 38 100 60 100 C82 100 94 78 92 50 Z" fill="${cloth}"/>`; }
+  // 前发(刘海)
+  if(style==='short' || style==='slick'){ hairFront = `<path d="M28 50 C28 26 46 22 60 22 C74 22 92 26 92 50 C84 38 76 34 60 34 C44 34 36 38 28 50 Z" fill="${hair}"/>`; }
+  else if(style==='spiky'){ hairFront = `<path d="M30 48 C32 26 44 18 52 26 C56 16 64 16 68 26 C76 18 88 26 90 48 C80 34 74 30 60 30 C46 30 40 34 30 48 Z" fill="${hair}"/>`; }
+  else if(style==='messy'){ hairFront = `<path d="M28 50 C26 28 40 20 50 30 C52 20 60 20 66 28 C70 18 82 22 92 44 C86 32 74 30 60 30 C46 30 38 34 28 50 Z" fill="${hair}"/>`; }
+  else if(style==='long' || style==='twintails'){ hairFront = `<path d="M28 50 C28 28 44 22 60 22 C76 22 92 28 92 50 C84 40 76 36 60 36 C44 36 36 40 28 50 Z" fill="${hair}"/>`; }
+  else if(style==='bun'){ hairFront = `<path d="M30 46 C30 28 44 22 60 22 C76 22 90 28 90 46 C82 38 76 34 60 34 C44 34 38 38 30 46 Z" fill="${hair}"/>`; }
+  else if(style==='hood'){ hairFront = `<path d="M28 48 C30 30 46 26 60 26 C74 26 90 30 92 48 C82 40 76 36 60 36 C44 36 38 40 28 48 Z" fill="${cloth}"/><path d="M28 48 C40 46 80 46 92 48 L92 56 C80 54 40 54 28 56 Z" fill="${cloth}"/>`; }
+  else { hairFront = `<path d="M30 48 C32 26 46 20 60 22 C74 20 88 26 90 48 C80 36 74 32 60 32 C46 32 40 36 30 48 Z" fill="${hair}"/>`; }
+  // 女性睫毛/睫毛更明显 + 腮红
+  if(fem){ lashes = `<path d="M42 62 L38 67 M78 62 L82 67" stroke="${eye}" stroke-width="1.4" fill="none" opacity=".7"/>`; }
+  const blush = fem || mouth==='shy' ? `<ellipse cx="46" cy="70" rx="6" ry="3" fill="#f48fb1" opacity=".55"/><ellipse cx="74" cy="70" rx="6" ry="3" fill="#f48fb1" opacity=".55"/>` : '';
+  // 眼睛
+  const eyes = `
+    <g>
+      <ellipse cx="44" cy="62" rx="9" ry="10" fill="#fff"/>
+      <ellipse cx="76" cy="62" rx="9" ry="10" fill="#fff"/>
+      <ellipse cx="44" cy="62" rx="5.5" ry="6.5" fill="${eye}"/>
+      <ellipse cx="76" cy="62" rx="5.5" ry="6.5" fill="${eye}"/>
+      <circle cx="44" cy="62" r="2.6" fill="#101018"/>
+      <circle cx="76" cy="62" r="2.6" fill="#101018"/>
+      <circle cx="46" cy="59" r="1.6" fill="#fff"/>
+      <circle cx="78" cy="59" r="1.6" fill="#fff"/>
+      ${lashes}
+    </g>`;
+  // 眉毛
+  let brow;
+  if(mouth==='serious'||mouth==='flat') brow = `<path d="M36 50 L52 49 M68 49 L84 50" stroke="${shade(hair,-10)}" stroke-width="2.2" fill="none"/>`;
+  else if(mouth==='smirk'||mouth==='grin') brow = `<path d="M36 51 L52 47 M68 49 L84 51" stroke="${shade(hair,-10)}" stroke-width="2.2" fill="none"/>`;
+  else brow = `<path d="M36 50 Q44 47 52 50 M68 50 Q76 47 84 50" stroke="${shade(hair,-10)}" stroke-width="2.2" fill="none"/>`;
+  // 嘴巴
+  let m;
+  if(mouth==='smile') m = `<path d="M52 78 Q60 85 68 78" stroke="#b0524a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  else if(mouth==='grin') m = `<path d="M50 78 Q60 88 70 78 Z" fill="#c2554d"/><path d="M54 79 Q60 83 66 79" stroke="#fff" stroke-width="1.4" fill="none"/>`;
+  else if(mouth==='goofy') m = `<path d="M48 77 Q60 90 72 77" stroke="#b0524a" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  else if(mouth==='smirk') m = `<path d="M52 77 Q63 81 70 76" stroke="#b0524a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  else if(mouth==='shy') m = `<path d="M55 79 Q60 82 65 79" stroke="#b0524a" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else if(mouth==='serious') m = `<path d="M53 79 L67 79" stroke="#b0524a" stroke-width="2.2" stroke-linecap="round"/>`;
+  else m = `<path d="M54 79 Q60 81 66 79" stroke="#b0524a" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  // 眼镜/饰物
+  let accSVG='';
+  if(acc==='glasses') accSVG = `<circle cx="44" cy="62" r="11" fill="none" stroke="#20243a" stroke-width="2"/><circle cx="76" cy="62" r="11" fill="none" stroke="#20243a" stroke-width="2"/><path d="M55 62 L65 62" stroke="#20243a" stroke-width="2"/>`;
+  else if(acc==='headband') accSVG = `<path d="M30 38 Q60 30 90 38" stroke="#e8e8f0" stroke-width="4" fill="none"/><rect x="24" y="34" width="72" height="5" rx="2" fill="#e8e8f0"/>`;
+  else if(acc==='ribbon') accSVG = `<g><circle cx="46" cy="40" r="5" fill="#ff6b9d"/><circle cx="74" cy="40" r="5" fill="#ff6b9d"/></g>`;
+  else if(acc==='cap') accSVG = `<path d="M38 40 Q60 28 82 40 Q60 34 38 40 Z" fill="${shade(hair,-8)}"/>`;
+  else if(acc==='earring') accSVG = `<circle cx="88" cy="76" r="2.4" fill="#ffd23f" stroke="#b08a1a" stroke-width="1"/>`;
+  else if(acc==='hoodie') accSVG = `<path d="M34 50 Q60 34 86 50 L86 60 Q60 48 34 60 Z" fill="${cloth}"/>`;
+  else if(acc==='scar') accSVG = `<path d="M82 46 L88 56" stroke="#b0553a" stroke-width="2" stroke-linecap="round"/>`;
+  // 身体
+  const body = `<path d="M28 110 Q30 90 46 88 L74 88 Q90 90 92 110 Z" fill="${cloth}"/><path d="M46 88 L74 88 L74 96 L46 96 Z" fill="#f5f7fb" opacity=".85"/>`;
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" width="${size||150}" height="${size||150}">
+    <ellipse cx="60" cy="60" rx="34" ry="32" fill="${tone}"/>
+    <ellipse cx="60" cy="98" rx="6" ry="9" fill="${toneDark}"/>
+    ${hairBack}${extra}
+    <circle cx="26" cy="62" r="5" fill="${tone}"/><circle cx="94" cy="62" r="5" fill="${tone}"/>
+    ${hairFront}
+    ${brow}${eyes}${blush}${m}${accSVG}
+    ${body}
+  </svg>`;
+}
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt, g=((n>>8)&255)+amt, b=(n&255)+amt;
+  r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+
+/* ---------- 行动定义 ---------- */
+const ACTIONS = [
+  {id:'study',    name:'学习',   icon:'📖', bg:'classroom',  stats:{si:+2,xue:+3},       mood:-5,  desc:'沉下心来刷题、预习、复习。'},
+  {id:'exercise', name:'锻炼',   icon:'🏃', bg:'playground', stats:{tn:+3,wl:+2},       mood:+5,  desc:'在操场挥洒汗水，强健体魄。'},
+  {id:'club',     name:'社团活动',icon:'🎨', bg:'classroom',  stats:{wy:+3,wc:+2},       mood:+5,  desc:'投入社团，打磨才艺与作品。'},
+  {id:'social',   name:'社交',   icon:'💬', bg:'corridor',   stats:{jj:+3,yy:+2,ym:+1}, mood:+8,  encounter:true, desc:'在走廊、课间与同学们谈天说地。'},
+  {id:'rest',     name:'休息',   icon:'🛋️', bg:'classroom',  stats:{},                  mood:+18, stamina:+28, desc:'好好睡一觉，回满状态。'},
+  {id:'date',     name:'约会',   icon:'💘', bg:'rooftop',    stats:{la:+3,xzl:+2},      mood:+10, needsTarget:true, desc:'和喜欢的人单独相处。'},
+];
+
+/* ---------- 全局状态 ---------- */
+let state = null;
+function freshState(){
+  return {
+    screen:'title',
+    name:'', gender:'',
+    // 创建流程
+    createStep:'name',
+    draft:{remaining:[...ATTR_KEYS], round:[], picks:{}, roundNo:0, rerolls:3},
+    player:{attrs:{}, },
+    // 主循环
+    week:1, energy:3, stamina:80, mood:70,
+    affection:{},       // charId -> 0..100
+    bestFriend:null,
+    flags:{},           // 已触发剧情标记
+    log:[],             // 简短日志
+    ending:null,
+    dateTarget:null,
+  };
+}
+const WEEKS_PER_YEAR = 24;
+function year(){ return Math.min(3, Math.ceil(state.week / WEEKS_PER_YEAR)); }
+function yearWeek(){ return state.week - (year()-1)*WEEKS_PER_YEAR; }
+function term(){ return yearWeek()<=12?1:2; }
+function weekLabel(){
+  const y=year(), yw=yearWeek(), tm=yw<=12?1:2, tw=yw<=12?yw:yw-12;
+  return `高${'一二三'[y-1]}${tm===1?'上':'下'}·第${tw}周`;
+}
+
+/* ---------- 存档 ---------- */
+const SAVE_KEY='galgame_qingkong_v1';
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
+function load(){ try{ const s=localStorage.getItem(SAVE_KEY); if(s) state=JSON.parse(s); }catch(e){} }
+function hasSave(){ try{ return !!localStorage.getItem(SAVE_KEY); }catch(e){ return false; } }
+function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+
+/* ---------- 工具 ---------- */
+const $ = sel => document.querySelector(sel);
+const screen = () => $('#screen');
+const navEl = () => $('#nav');
+function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function pick(arr,n){
+  const a=[...arr], out=[];
+  while(out.length<n && a.length){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); }
+  return out;
+}
+function setBG(bg){
+  const el=$('#bgLayer'); if(!el) return;
+  el.innerHTML = `<img src="${BGS[bg]||BGS.classroom}" alt=""><div class="veil"></div>`;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function af(id){ return state.affection[id]||0; }
+function addAff(id, n){
+  const cur = af(id);
+  state.affection[id] = Math.max(0, Math.min(100, cur + n));
+}
+
+/* =========================================================================
+   渲染主分发
+========================================================================= */
+function render(){
+  const sc = state.screen;
+  setBG(currentBG());
+  if(sc==='title') return renderTitle();
+  if(sc==='name') return renderName();
+  if(sc==='gender') return renderGender();
+  if(sc==='draft') return renderDraft();
+  if(sc==='game') return renderGame();
+  if(sc==='action') return renderAction();
+  if(sc==='event') return renderEvent();
+  if(sc==='stats') return renderStats();
+  if(sc==='relations') return renderRelations();
+  if(sc==='ending') return renderEnding();
+  if(sc==='weekend') return renderWeekend();
+  renderTitle();
+}
+function currentBG(){
+  if(state.screen==='game') return 'classroom';
+  if(state.screen==='event' && state.evt && state.evt.bg) return state.evt.bg;
+  if(state.screen==='action') return 'classroom';
+  if(state.screen==='ending') return 'rooftop';
+  if(state.screen==='relations'||state.screen==='stats') return 'corridor';
+  return 'classroom';
+}
+
+/* ---------- 标题 ---------- */
+function renderTitle(){
+  navEl().innerHTML='';
+  screen().innerHTML = `
+    <div class="card fade" style="text-align:center;padding:40px 20px;margin-top:40px;">
+      <div style="font-size:52px;line-height:1">🌸</div>
+      <h1 class="title" style="margin-top:14px;">青空之下</h1>
+      <p class="sub">高校青春物语 · 日式校园恋爱模拟</p>
+      <div class="divider"></div>
+      <p class="hint">高中三年，每周都有新的选择。<br>不同的属性会开启不同的故事，遇见不同的人。<br>四年一次的青春，请尽情挥霍。</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
+        ${hasSave()?'<button class="btn gold block" data-action="continue">继续游戏</button>':''}
+        <button class="btn primary block" data-action="newgame">开始新的故事</button>
+        ${hasSave()?'<button class="btn ghost block" data-action="wipe">清除存档</button>':''}
+      </div>
+    </div>`;
+}
+
+/* ---------- 创建角色：姓名 ---------- */
+function renderName(){
+  navEl().innerHTML='';
+  screen().innerHTML = `
+    <div class="card fade" style="margin-top:50px;">
+      <h1 class="title">🌸 欢迎来到青空高中</h1>
+      <p class="sub">故事开始前，先告诉我你的名字。</p>
+      <input type="text" id="nameInput" maxlength="8" placeholder="输入你的名字（最多8字）" value="${esc(state.name)}">
+      <div style="margin-top:14px;">
+        <button class="btn primary block" data-action="name-ok">继续</button>
+      </div>
+    </div>`;
+  const inp=$('#nameInput'); if(inp){ inp.focus(); }
+}
+
+/* ---------- 创建角色：性别 ---------- */
+function renderGender(){
+  navEl().innerHTML='';
+  screen().innerHTML = `
+    <div class="card fade" style="margin-top:40px;">
+      <h1 class="title">选择你的性别</h1>
+      <p class="sub">这会决定你能开启的恋爱路线。</p>
+      <div class="grid2" style="margin-top:14px;">
+        <button class="btn block" data-action="gender-m" style="padding:24px;font-size:20px;">♂ 男生</button>
+        <button class="btn block" data-action="gender-f" style="padding:24px;font-size:20px;">♀ 女生</button>
+      </div>
+      <p class="hint" style="margin-top:12px;">男生可攻略 4 位女主角，女生可攻略 4 位男主角，其余同学将成为挚友。</p>
+    </div>`;
+}
+
+/* ---------- 创建角色：三选一抽属性 ---------- */
+function renderDraft(){
+  navEl().innerHTML='';
+  const d = state.draft;
+  const remaining = d.remaining.length;
+  if(remaining<=0){
+    // 抽完，进入主循环
+    state.screen='game';
+    initRelationships();
+    pushWeekIntro();
+    return render();
+  }
+  if(d.round.length===0){
+    d.round = pick(CHARACTERS, Math.min(3, remaining)).map(c=>({id:c.id, picked:null}));
+  }
+  const need = d.round.length;
+  const pickedCount = d.round.filter(r=>r.picked).length;
+  const done = pickedCount===need;
+  const rows = d.round.map(r=>{
+    const c=BY_ID[r.id];
+    return `
+      <div class="card" style="padding:12px;">
+        <div class="portrait">
+          ${portraitSVG(c,120)}
+          <div class="pname">${c.name} <span class="prole">· ${c.role}</span></div>
+        </div>
+        <div class="divider"></div>
+        <div class="scroll" style="max-height:200px;">
+          ${ATTRS.map(a=>{
+            const usedElse = d.round.some(o=>o.id!==r.id && o.picked===a.k);
+            const assigned = !d.remaining.includes(a.k);
+            const sel = r.picked===a.k;
+            const cls = sel?'sel':(usedElse||assigned?'lock':'');
+            const v = c.attrs[a.k];
+            return `<div class="attr selectable ${cls}" data-action="draft-pick" data-cid="${c.id}" data-attr="${a.k}">
+              <span class="k">${a.icon} ${a.n}</span><span class="v">${v}</span></div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+  screen().innerHTML = `
+    <div class="card fade" style="margin-top:10px;">
+      <div class="between">
+        <h1 class="title" style="font-size:20px;margin:0;">天赋抽取</h1>
+        <span class="chip">第 ${d.roundNo+1} 轮</span>
+      </div>
+      <p class="sub" style="margin-bottom:6px;">从这 3 位同学身上，各选 1 项天赋继承（每人限选一项）。已选 <b class="hl" style="color:var(--accent)">${14 - remaining}</b>/14</p>
+      <div class="row" style="justify-content:center;">
+        ${Array.from({length:d.rerolls}).map(()=>'<span style="color:var(--gold)">🔄</span>').join('')||'<span class="hint">无刷新次数</span>'}
+      </div>
+    </div>
+    <div class="grid3">${rows}</div>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:9px;">
+      <button class="btn primary block" data-action="draft-confirm" ${done?'':'disabled'}>${done?'确定本轮选择':'从每位同学各选一项'}</button>
+      <button class="btn ghost block" data-action="draft-reroll" ${d.rerolls<=0?'disabled':''}>🔄 换一批同学（剩余 ${d.rerolls}）</button>
+    </div>`;
+}
+
+/* ---------- 主界面 HUD ---------- */
+function hud(){
+  const stamina = state.stamina, mood=state.mood;
+  return `
+    <div id="hud">
+      <div class="hud-top">
+        <div>
+          <span class="hud-name">${esc(state.name)}<span class="gen">${state.gender==='m'?'♂':'♀'}</span></span>
+          <div class="hud-sub">${weekLabel()} · 青春进行中</div>
+        </div>
+        <div class="energy">${Array.from({length:3}).map((_,i)=>`<i class="${i<state.energy?'':'off'}"></i>`).join('')}</div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <span class="small">💪体力</span><div class="bar-wrap"><div class="bar sta" style="width:${stamina}%"></div></div>
+        <span class="small">😊心情</span><div class="bar-wrap"><div class="bar mood" style="width:${mood}%"></div></div>
+      </div>
+    </div>`;
+}
+
+/* ---------- 主界面 ---------- */
+function renderGame(){
+  navEl().innerHTML = navBar();
+  const dateBtn = state.dateTarget ? `<button class="btn accent sm" data-action="set-date">💘 ${BY_ID[state.dateTarget].name}</button>` : `<button class="btn sm" data-action="pick-date">💘 选择约会对象</button>`;
+  screen().innerHTML = `
+    ${hud()}
+    <div class="card fade">
+      <div class="between" style="margin-bottom:6px;">
+        <h1 class="title" style="font-size:18px;margin:0;">📅 这一周，做点什么？</h1>
+      </div>
+      <p class="hint">每周有 3 点行动力。安排学习、锻炼、社交，或去赴一场约会。</p>
+      <div class="row" style="margin-top:8px;">${dateBtn}</div>
+    </div>
+    <div class="grid3">
+      ${ACTIONS.map(a=>{
+        if(a.needsTarget && !state.dateTarget) return `<button class="btn" data-action="need-target" style="opacity:.45">${a.icon} 约会</button>`;
+        const disable = state.energy<=0 || state.stamina<5;
+        return `<button class="btn" data-action="do-action" data-act="${a.id}" ${disable?'disabled':''}>
+          ${a.icon}<br>${a.name}</button>`;
+      }).join('')}
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="between"><span style="font-weight:700;">📌 我的核心属性</span><button class="btn sm" data-action="go-stats">查看全部</button></div>
+      <div class="grid2" style="margin-top:10px;">
+        ${topAttrs().map(([k,v])=>`<div class="attr"><span class="k">${ATTRS.find(a=>a.k===k).icon} ${ATTRS.find(a=>a.k===k).n}</span><span class="v">${v}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px;">
+      <div class="between"><span style="font-weight:700;">📜 最近发生</span><button class="btn sm" data-action="go-relations">人际关系</button></div>
+      <div class="scroll" style="margin-top:8px;max-height:120px;">
+        ${(state.log.slice(0,6).map(l=>`<p class="hint" style="margin:4px 0;">${l}</p>`).join(''))||'<p class="hint">还没有记录，快去创造故事吧。</p>'}
+      </div>
+    </div>`;
+}
+function topAttrs(){
+  const a = state.player.attrs;
+  return Object.entries(a).sort((x,y)=>y[1]-x[1]).slice(0,6);
+}
+
+/* ---------- 行动选择 ---------- */
+function renderAction(){
+  navEl().innerHTML='';
+  screen().innerHTML = `
+    ${hud()}
+    <div class="card fade">
+      <h1 class="title" style="font-size:18px;">选择行动</h1>
+      <p class="sub">消耗 1 点行动力</p>
+      <div class="grid2">
+        ${ACTIONS.map(a=>{
+          if(a.needsTarget && !state.dateTarget) return `<button class="btn" data-action="need-target" style="opacity:.45">${a.icon} 约会</button>`;
+          const disable = state.energy<=0;
+          return `<button class="btn" data-action="do-action" data-act="${a.id}" ${disable?'disabled':''}>
+            <span style="font-size:18px">${a.icon}</span> ${a.name}
+            <span class="small">${a.desc}</span></button>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:12px;"><button class="btn ghost block" data-action="back-game">← 返回</button></div>
+    </div>`;
+}
+
+/* ---------- 事件叙事 ---------- */
+function renderEvent(){
+  const evt = state.evt || {};
+  navEl().innerHTML='';
+  const who = evt.char ? BY_ID[evt.char] : null;
+  screen().innerHTML = `
+    <div class="dlg fade">
+      <div class="who">
+        ${who?`<div class="avatar">${portraitSVG(who,44)}</div><div><div class="nm">${who.name} <span class="rl">· ${who.role}</span></div></div>`:`<div><div class="nm">📖 剧情</div></div>`}
+      </div>
+      <div class="txt">${evt.text||''}</div>
+      ${evt.stats && Object.keys(evt.stats).length?`<div class="row" style="margin-top:8px;">${Object.entries(evt.stats).map(([k,v])=>`<span class="chip" style="color:${v>0?'var(--good)':'var(--bad)'}">${ATTRS.find(a=>a.k===k).icon} ${v>0?'+':''}${v}</span>`).join('')}</div>`:''}
+      <div class="choices">
+        ${(evt.choices||[{t:'继续',next:'after-event'}]).map((c,i)=>`<button class="btn ${i===0?'primary':''}" data-action="event-choice" data-i="${i}">${c.t}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+/* ---------- 属性详情 ---------- */
+function renderStats(){
+  navEl().innerHTML = navBar('stats');
+  const a = state.player.attrs;
+  screen().innerHTML = `
+    ${hud()}
+    <div class="card fade">
+      <div class="between"><h1 class="title" style="font-size:18px;margin:0;">📊 属性面板</h1></div>
+      <div class="grid2" style="margin-top:12px;">
+        ${ATTRS.map(att=>{
+          const v=a[att.k]||0;
+          return `<div class="attr"><span class="k">${att.icon} ${att.n}</span><span class="v">${v}</span></div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+/* ---------- 人际关系 ---------- */
+function renderRelations(){
+  navEl().innerHTML = navBar('relations');
+  const chars = [...CHARACTERS].sort((x,y)=>af(y.id)-af(x.id));
+  screen().innerHTML = `
+    ${hud()}
+    <div class="card fade">
+      <div class="between"><h1 class="title" style="font-size:18px;margin:0;">💕 人际关系</h1>
+        ${state.bestFriend?`<span class="chip">挚友：${BY_ID[state.bestFriend].name}</span>`:''}</div>
+      <p class="hint">好感度越高，越容易触发专属剧情与结局。</p>
+    </div>
+    <div class="scroll">
+      ${chars.map(c=>{
+        const a=af(c.id);
+        const isRomance = c.gender!==state.gender && c.romance!==false;
+        const label = isRomance?'可攻略':(c.gender===state.gender?'同窗':'同窗');
+        return `<div class="card" style="padding:12px;margin-bottom:10px;">
+          <div class="row">
+            <div class="avatar" style="width:46px;height:46px;border-radius:50%;overflow:hidden;flex:0 0 auto;border:2px solid ${isRomance?'var(--accent)':'var(--line)'};">${portraitSVG(c,46)}</div>
+            <div style="flex:1;">
+              <div class="between"><span class="hud-name" style="font-size:14px;">${c.name} <span class="prole" style="font-size:11px;color:var(--dim)">${c.role}</span></span>
+                <span class="small">${isRomance?'💘':(c.gender===state.gender?'🤝':'🤝')} ${label}</span></div>
+              <div class="row" style="margin-top:6px;"><span class="heart">♥</span><div class="aff-bar"><div class="fill" style="width:${a}%"></div></div><span class="small">${a}</span></div>
+            </div>
+          </div>
+          <p class="hint" style="margin:8px 0 0;">${c.desc}</p>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+/* ---------- 周总结 ---------- */
+function renderWeekend(){
+  navEl().innerHTML='';
+  screen().innerHTML = `
+    <div class="card fade" style="margin-top:40px;">
+      <div style="text-align:center;font-size:42px;">📆</div>
+      <h1 class="title" style="text-align:center;">${weekLabel()} · 结束</h1>
+      <p class="sub" style="text-align:center;">这一周过去了，新的日子又将来临。</p>
+      <div style="margin-top:10px;"><button class="btn primary block" data-action="next-week">进入新的一周 →</button></div>
+    </div>`;
+}
+
+/* ---------- 结局 ---------- */
+function renderEnding(){
+  navEl().innerHTML='';
+  const e = state.ending;
+  screen().innerHTML = `
+    <div class="card ending-box fade" style="margin-top:30px;padding:28px;">
+      <div style="font-size:56px;">${e.icon}</div>
+      <div style="margin:12px 0;"><span class="badge ${e.badge}">${e.badgeLabel}</span></div>
+      <h1 class="title" style="text-align:center;">${e.title}</h1>
+      <div class="divider"></div>
+      <p class="big">${e.text}</p>
+      <div style="margin-top:18px;">
+        <button class="btn gold block" data-action="newgame">再续一段青春</button>
+      </div>
+    </div>`;
+}
+
+/* ---------- 底部导航 ---------- */
+function navBar(active){
+  const b = (id,label)=>`<button class="btn ${active===id?'primary':''}" data-action="nav-${id}">${label}</button>`;
+  return `${b('game','🏠 日常')}${b('stats','📊 属性')}${b('relations','💕 关系')}${b('menu','⚙️ 菜单')}`;
+}
+
+/* =========================================================================
+   逻辑
+========================================================================= */
+function initRelationships(){
+  // 初始好感度：同班同学略高
+  CHARACTERS.forEach(c=>{ state.affection[c.id]=state.affection[c.id]||0; });
+}
+function pushWeekIntro(){
+  state.log.unshift(`高中生活开始啦！欢迎你，${state.name}。`);
+  addAffAll(3);
+}
+function addAffAll(n){ CHARACTERS.forEach(c=>addAff(c.id,n)); }
+
+/* 应用行动 */
+function doAction(actId){
+  const act = ACTIONS.find(a=>a.id===actId);
+  if(!act) return;
+  if(state.energy<=0) return;
+  state.energy--;
+  const tired = state.stamina < 25;
+  const gains = {};
+  Object.entries(act.stats).forEach(([k,v])=>{
+    const actual = tired ? Math.max(1, Math.floor(v*0.6)) : v;
+    state.player.attrs[k] = Math.min(100, (state.player.attrs[k]||0)+actual);
+    gains[k] = actual;
+  });
+  state.stamina = Math.max(0, state.stamina - 5);
+  state.mood = Math.max(0, Math.min(100, state.mood + (act.mood||0)));
+  if(act.stamina) state.stamina = Math.min(100, state.stamina + act.stamina);
+  // 社交偶遇
+  if(act.encounter){
+    const c = rnd(CHARACTERS);
+    const aff = rand(2,5);
+    addAff(c.id, aff);
+    state.log.unshift(`和${c.name}聊得很开心（好感+${aff}）`);
+    // 好感达标时概率触发专属剧情
+    const pending = (c.stories||[]).map((s,i)=>[s,i]).filter(([s,i])=> af(c.id)>=s.min && !state.flags['story:'+c.id+':'+i]);
+    if(pending.length && Math.random()<0.6){
+      const [s,i] = pending[0];
+      state.flags['story:'+c.id+':'+i] = true;
+      showEvent({char:c.id, text:s.text, stats:gains, choices:[{t:'继续',next:'after-event'}]});
+      return;
+    }
+    const line = c.lines[rand(0,c.lines.length-1)];
+    showEvent({char:c.id, text:`课间，你遇到了${c.name}。\n\n「${line}」`, stats:gains, choices:[{t:'继续',next:'after-event'}]});
+    return;
+  }
+  if(act.id==='date'){
+    return doDate(gains);
+  }
+  // 选择性事件（分支抉择，打破每周单调）
+  if(Math.random()<0.45){
+    return triggerChoiceEvent();
+  }
+  // 随机小事件（带选项）
+  if(Math.random()<0.20){
+    const e = rnd(RANDOM_EVENTS);
+    state.log.unshift(e.title);
+    showEvent({text:e.text, choices:e.choices});
+    return;
+  }
+  state.log.unshift(`${act.name}${Object.keys(gains).length?`（${Object.entries(gains).map(([k,v])=>`${ATTRS.find(a=>a.k===k).n}+${v}`).join('、')}）`:''}`);
+  showEvent({text:`你选择了「${act.name}」。${act.desc}`, stats:gains, choices:[{t:'继续',next:'after-event'}]});
+}
+
+/* 约会 */
+function doDate(gains){
+  const c = BY_ID[state.dateTarget];
+  if(!c) return;
+  const affBefore = af(c.id);
+  const aff = rand(5,9);
+  addAff(c.id, aff);
+  state.log.unshift(`和${c.name}约会，感情升温（好感+${aff}）`);
+  const isRomance = c.gender!==state.gender;
+  const scene = isRomance ? rnd(c.date||['你们一起度过了美好的时光。']) : `你们像最好的朋友一样玩耍，度过了一段愉快的时光。`;
+  let text = `天台的风很温柔。你和${c.name}并肩而立。\n\n${scene}`;
+  const extraChoices = [];
+  // 好感足够 → 可告白（第三年）
+  if(isRomance && affBefore>=60 && year()>=3){
+    extraChoices.push({t:'💘 鼓起勇气告白', act:'confess'});
+  }
+  showEvent({bg:'rooftop', char:c.id, text, stats:gains, choices:[...extraChoices, {t:'珍惜这段时光',next:'after-event'}]});
+  // 保存目标
+  state.evt.target = c.id;
+}
+
+/* 通用事件弹窗 */
+function showEvent(evt){
+  state.evt = evt;
+  state.screen='event';
+  render();
+}
+
+/* 触发一个选择性事件（尽量不重复最近触发过的） */
+function triggerChoiceEvent(){
+  const used = state.choiceUsed||[];
+  let avail = [];
+  for(let i=0;i<CHOICE_EVENTS.length;i++) if(!used.includes(i)) avail.push(i);
+  if(!avail.length){ avail = CHOICE_EVENTS.map((_,i)=>i); state.choiceUsed=[]; }
+  const idx = avail[rand(0, avail.length-1)];
+  state.choiceUsed = (state.choiceUsed||[]).concat([idx]).slice(-12);
+  const e = CHOICE_EVENTS[idx];
+  showEvent({bg:e.bg||'corridor', char:e.char, text:e.text, choices:e.choices});
+}
+
+/* 应用一个选择的效果：好感 / 属性 / 心情 / 体力 */
+function applyEffect(effect){
+  if(!effect) return;
+  if(effect.aff){ Object.entries(effect.aff).forEach(([id,n])=>addAff(id,n)); }
+  if(effect.stats){ Object.entries(effect.stats).forEach(([k,v])=>{ state.player.attrs[k]=Math.min(100, Math.max(0, (state.player.attrs[k]||0)+v)); }); }
+  if(effect.mood){ state.mood = Math.max(0, Math.min(100, state.mood + effect.mood)); }
+  if(effect.stamina){ state.stamina = Math.max(0, Math.min(100, state.stamina + effect.stamina)); }
+}
+function effectSummary(effect){
+  if(!effect) return '';
+  const parts=[];
+  if(effect.aff) Object.entries(effect.aff).forEach(([id,n])=>{ const c=BY_ID[id]; parts.push(`${c?c.name:id} 好感${n>0?'+':''}${n}`); });
+  if(effect.stats) Object.entries(effect.stats).forEach(([k,v])=>{ const a=ATTRS.find(x=>x.k===k); parts.push(`${a?a.n:k} ${v>0?'+':''}${v}`); });
+  if(effect.mood) parts.push(`心情 ${effect.mood>0?'+':''}${effect.mood}`);
+  if(effect.stamina) parts.push(`体力 ${effect.stamina>0?'+':''}${effect.stamina}`);
+  return parts.length?`（${parts.join('、')}）`:'';
+}
+function applyChoiceEvent(evt, ch){
+  applyEffect(ch.effect);
+  // 连锁剧情：中断或推进到下一章
+  if(evt.chain && state.chain){
+    if(ch.endChain){ state.chain=null; }
+    else {
+      state.chain.step++;
+      if(!CHAINS[state.chain.id] || state.chain.step >= CHAINS[state.chain.id].length){ state.chain=null; }
+    }
+  }
+  const note = effectSummary(ch.effect);
+  showEvent({bg: evt.bg||'corridor', char: evt.char, text:(ch.result||'')+(note?`\n\n${note}`:''), choices:[{t:'继续', next:'after-event'}]});
+}
+
+/* 周推进 */
+function advanceWeek(){
+  state.week++;
+  state.energy=3;
+  state.stamina = Math.min(100, state.stamina + 20);
+  state.mood = Math.min(100, state.mood + 5);
+  // 期末/大事件
+  const sched = getScheduled(state.week);
+  if(sched){ state.evt = sched; state.screen='event'; return render(); }
+  if(state.week>WEEKS_PER_YEAR*3){ return finishGame(); }
+  // 连锁剧情续章优先
+  if(state.chain && CHAINS[state.chain.id] && state.chain.step < CHAINS[state.chain.id].length){
+    return showChainPart();
+  }
+  // 非大事件周：概率触发连锁剧情或抉择事件
+  const r = Math.random();
+  const eligible = Object.keys(CHAINS).filter(id=>{
+    const g = CHAIN_GATE[id]; if(!g) return true;
+    if(g.minYear && year()<g.minYear) return false;
+    if(g.minAff){ for(const [cid,min] of Object.entries(g.minAff)) if(af(cid)<min) return false; }
+    return true;
+  });
+  if(eligible.length && r < 0.08){ return startChain(rnd(eligible)); }
+  if(r < 0.30){ return triggerChoiceEvent(); }
+  state.screen='game';
+  render();
+}
+function finishGame(){
+  computeEnding();
+  state.screen='ending';
+  render();
+}
+
+/* =========================================================================
+   事件库
+========================================================================= */
+function getScheduled(week){
+  const S = SCHEDULED[week];
+  return S ? (typeof S==='function' ? S() : S) : null;
+}
+function examEvent(name){
+  return {
+    bg:'classroom', title:name,
+    text:`${name}来临。考场上，你提笔作答。\n\n平时的积累在此刻化作分数。`,
+    choices:[{t:'交卷',next:'exam-result'}]
+  };
+}
+function examResult(){
+  const name = (state.evt && state.evt.title) || '考试';
+  const xue = state.player.attrs.xue||0, si=state.player.attrs.si||0;
+  const score = Math.round((xue*0.6+si*0.4));
+  const stats={};
+  const boost = Math.round((score-50)/10);
+  if(boost>0){ stats.xue=boost; state.player.attrs.xue=Math.min(100,(state.player.attrs.xue||0)+boost); }
+  const rank = score>=95?'年级前五':score>=85?'年级前二十':score>=70?'中上游':'需要加油';
+  state.log.unshift(`${name}：${rank}`);
+  let text;
+  if(score>=90) text=`成绩公布，你名列前茅，${rank}！同学们投来羡慕的目光。`;
+  else if(score>=75) text=`成绩公布，你稳定发挥，位列${rank}。继续努力。`;
+  else text=`成绩公布，你排在${rank}。别灰心，接下来多用功。`;
+  showEvent({bg:'classroom', text, stats, choices:[{t:'继续',next:'after-event'}]});
+}
+function sportsMeet(name){
+  const tn=state.player.attrs.tn||0, wl=state.player.attrs.wl||0;
+  const score=Math.round(tn*0.6+wl*0.4);
+  const stats={}; if(score>70){stats.tn=2;stats.wl=1; state.player.attrs.tn=Math.min(100,(state.player.attrs.tn||0)+2); state.player.attrs.wl=Math.min(100,(state.player.attrs.wl||0)+1);}
+  const res = score>=90?'你在田径赛上一骑绝尘，为班级拿下金牌！':score>=75?'你在接力赛中表现出色，帮助班级取得名次。':'你为班级呐喊助威，一起流汗的时光同样珍贵。';
+  return {bg:'playground', title:name, text:`${name}开幕了！跑道、欢呼、青春的热浪。\n\n${res}`, stats, choices:[{t:'挥洒汗水',next:'after-event'}]};
+}
+function cultureFestival(name, intro){
+  const wy=state.player.attrs.wy||0, wc=state.player.attrs.wc||0;
+  const score=Math.round(wy*0.6+wc*0.4);
+  const stats={}; if(score>70){stats.wy=2;stats.wc=1; state.player.attrs.wy=Math.min(100,(state.player.attrs.wy||0)+2); state.player.attrs.wc=Math.min(100,(state.player.attrs.wc||0)+1);}
+  const res = score>=90?'你的作品大放异彩，被很多人围观称赞！':score>=75?'你和同学们一起布置摊位，热闹了一整天。':'你安静地逛着各个摊位，感受青春的气息。';
+  return {bg:'corridor', title:name, text:`${intro}\n\n${res}`, stats, choices:[{t:'享受盛会',next:'after-event'}]};
+}
+function fieldTrip(place, text){
+  return {bg:'playground', title:`修学旅行 · ${place}`, text, choices:[{t:'出发！',next:'after-event'}]};
+}
+function valentine(y){
+  const crush = CHARACTERS.filter(c=>c.gender!==state.gender && af(c.id)>=40).sort((a,b)=>af(b.id)-af(a.id))[0];
+  const extra = crush ? `\n\n课桌里静静躺着一盒巧克力，附着一张字条，落款是……${crush.name}。你的心跳漏了一拍。` : `\n\n你收到了一封没有署名的信，字迹娟秀。会是巧合吗？`;
+  return {bg:'rooftop', title:`情人节 · ${y}`, text:`二月十四，校园里飘着若有若无的甜味。女生们紧张地送出巧克力，男生们故作镇定。${extra}`, choices:[{t:'收下这份心意',next:'after-event'}]};
+}
+function clubRecruit(){
+  return {bg:'corridor', title:'社团招新', text:`一年一度的社团招新开始啦！走廊里摆满了花花绿绿的海报。\n\n「文学社欢迎你！」「篮球部还差一个人！」「来天文社看星星吧！」\n\n喧闹声里，你感受到了青春的分量。`, choices:[{t:'逛一逛',next:'after-event'}]};
+}
+function clubChange(){
+  return {bg:'corridor', title:'社团交接', text:`社团里的学长学姐即将毕业，把交接的重担交到了你们手上。\n\n看着他们离开的背影，你忽然意识到，原来「传承」也是一种青春。`, choices:[{t:'接过担子',next:'after-event'}]};
+}
+function comingOfAge(){
+  return {bg:'classroom', title:'成人礼', text:`十八岁，成人礼。你换上了正装，胸前别着一朵花。\n\n从今天起，你不再是个孩子。可你心里清楚，那个爱笑爱闹的少年，其实一直没走。`, choices:[{t:'许下愿望',next:'after-event'}]};
+}
+function pepRally(){
+  return {bg:'playground', title:'百日誓师', text:`誓师大会上，你举起右拳，和全校高三一起喊出誓言。\n\n「不负青春，不负自己！」\n\n那一刻，你的眼眶有些发热。`, choices:[{t:'握紧拳头',next:'after-event'}]};
+}
+function confessionNight(){
+  const targets = CHARACTERS.filter(c=>c.gender!==state.gender && c.romance!==false && af(c.id)>=70);
+  if(targets.length===0){
+    return {bg:'rooftop', title:'毕业前夜', text:`毕业前的夜晚，你站在天台上，望着满天繁星。\n\n有些话，终究还是没能说出口。`, choices:[{t:'把心事埋在心里',next:'after-event'}]};
+  }
+  const opts = targets.map(c=>({t:`向 ${c.name} 告白`, act:'confess', cid:c.id}));
+  opts.push({t:'什么都不说', next:'after-event'});
+  return {bg:'rooftop', title:'毕业前夜 · 心意', text:`毕业前的天台，晚风习习。你心里有一个一直放不下的人。\n\n也许，这是最后的机会了。`, choices:opts};
+}
+function gaokao(){
+  return {bg:'classroom', title:'高考', text:`高考这天，你走进考场。窗外蝉鸣阵阵，教室里安静得能听见自己的心跳。\n\n三年所有的努力，都凝结在眼前的试卷上。`, choices:[{t:'提笔作答',next:'gaokao-result'}]};
+}
+function gaokaoResult(){
+  const xue=state.player.attrs.xue||0, si=state.player.attrs.si||0;
+  const score=Math.round(xue*0.6+si*0.4);
+  let line;
+  if(score>=92) line='你发挥超常，分数足以冲击顶尖学府。';
+  else if(score>=80) line='你考得很不错，理想大学在向你招手。';
+  else if(score>=65) line='成绩中规中矩，但你已拼尽全力，无怨无悔。';
+  else line='分数不算理想，但人生从来不只有一场考试。';
+  showEvent({bg:'rooftop', title:'高考放榜', text:`放榜那天，你颤抖着输入准考证号。\n\n${line}`, choices:[{t:'长舒一口气',next:'after-event'}]});
+}
+function graduation(){
+  return {bg:'rooftop', title:'毕业典礼', text:`毕业典礼上，校长念完了长长的致辞，阳光正好。\n\n你最后一次看向这群陪伴你三年的人，忽然觉得，青春这两个字，原来这么具体。`, choices:[{t:'走向未来',next:'graduate'}]};
+}
+const SCHEDULED = {
+  1:  ()=>({bg:'classroom', title:'入学式', text:`四月，樱花飘落。你第一次踏进青空高中的校门。\n\n分班表前，你找到了自己的名字。新的班级、新的同学、新的开始——属于你的三年青春，从这里启程。`, choices:[{t:'迈进校门',next:'after-event'}]}),
+  2:  clubRecruit,
+  4:  ()=>examEvent('高一 · 第一次月考'),
+  6:  ()=>sportsMeet('高一 · 体育祭'),
+  8:  ()=>fieldTrip('秋 · 古镇', `高一修学旅行，目的地是一座古色古香的小镇。\n\n青石板路、飘香的桂花糕，你和同学们走走停停，拍下了许多照片。`),
+  10: ()=>examEvent('高一上 · 期中考试'),
+  12: ()=>examEvent('高一上 · 期末考试'),
+  13: ()=>({bg:'corridor', title:'新学期', text:`寒假过后，高一下学期开始了。窗外的积雪已经融化，你对新学期有了一点新的期待。`, choices:[{t:'打起精神',next:'after-event'}]}),
+  16: ()=>examEvent('高一下 · 月考'),
+  17: ()=>valentine('高一'),
+  19: ()=>cultureFestival('文化祭 · 高一', `一年一度的文化祭到了！整个校园张灯结彩，弥漫着棉花糖和章鱼烧的香气。`),
+  21: ()=>fieldTrip('春 · 郊游', `春游日，全班坐上大巴去了郊外。\n\n铺开野餐布、放风筝、拍照，每个人都笑得没心没肺。`),
+  23: ()=>examEvent('高一下 · 期中考试'),
+  24: ()=>examEvent('高一下 · 期末考试'),
+  25: ()=>({bg:'classroom', title:'高二开学', text:`高二了。你不再是最初那个青涩的新生。课程变难了，朋友变多了，青春正处在最热烈的章节。`, choices:[{t:'继续前进',next:'after-event'}]}),
+  27: clubChange,
+  29: ()=>examEvent('高二上 · 月考'),
+  31: ()=>sportsMeet('高二 · 体育祭'),
+  33: ()=>fieldTrip('秋 · 古都', `高二的修学旅行去了古都。\n\n在古寺的钟声里，在旧书店的墨香里，你忽然对未来有了更清晰的模样。`),
+  35: ()=>examEvent('高二上 · 期中考试'),
+  36: ()=>examEvent('高二上 · 期末考试'),
+  37: ()=>({bg:'corridor', title:'新学期', text:`高二下学期。大家都在讨论未来的方向，空气里多了一丝迷茫，也多了几分坚定。`, choices:[{t:'继续',next:'after-event'}]}),
+  39: ()=>examEvent('高二下 · 月考'),
+  41: ()=>cultureFestival('文化祭 · 高二', `今年的文化祭轮到你们班主办，大家既兴奋又紧张，忙得不可开交。`),
+  43: ()=>valentine('高二'),
+  45: ()=>fieldTrip('春 · 海边', `春游去了海边。\n\n踩着浪花、捡着贝壳，咸咸的海风把一切烦恼都吹散了。`),
+  47: ()=>examEvent('高二下 · 期中考试'),
+  48: ()=>examEvent('高二下 · 期末考试'),
+  49: ()=>({bg:'classroom', title:'高三 · 冲刺', text:`高三了。黑板上的倒计时一天天减少，空气里都是紧张的味道。\n\n这是最后一年，也是决定命运的一年。`, choices:[{t:'全力以赴',next:'after-event'}]}),
+  51: ()=>examEvent('高三 · 一模'),
+  53: ()=>examEvent('高三 · 月考'),
+  55: ()=>examEvent('高三 · 二模'),
+  57: comingOfAge,
+  59: ()=>examEvent('高三 · 三模'),
+  60: ()=>examEvent('高三上 · 期末考试'),
+  61: ()=>({bg:'classroom', title:'最后冲刺', text:`高三下学期，倒计时不足百日。教室里安静得能听见翻书声，每个人都在为那个终点拼命。`, choices:[{t:'咬牙坚持',next:'after-event'}]}),
+  63: ()=>examEvent('高三 · 四模'),
+  65: pepRally,
+  66: confessionNight,
+  68: gaokao,
+  70: gaokaoResult,
+  72: graduation,
+};
+
+/* 随机事件池 */
+const RANDOM_EVENTS = [
+  {title:'课堂提问', text:`课堂上，老师突然点名提问。`, choices:[
+    {t:'胸有成竹地作答', effect:{stats:{xue:2}}, result:`你稍一思索便答了上来，老师满意地点点头。`},
+    {t:'虚心承认还没想好', effect:{stats:{si:2}}, result:`你诚实地摇头，老师非但没责怪，还耐心地又讲了一遍。`},
+  ]},
+  {title:'图书馆偶遇', text:`在图书馆，你遇到了达芬，他正抱着一摞书发呆。`, choices:[
+    {t:'一起自习', effect:{aff:{dafen:3}, stats:{xue:2}}, result:`你们安静地并肩自习。达芬偶尔抬头，冲你感激地一笑。`},
+    {t:'点头致意后离开', effect:{stats:{xue:1}}, result:`你找了个角落坐下，各自沉浸在学习里。`},
+  ]},
+  {title:'食堂排队', text:`食堂的队伍排得很长，你耐心等待着。`, choices:[
+    {t:'和同学聊聊考试', effect:{stats:{xue:1}}, result:`你们交流着复习心得，时间过得飞快。`},
+    {t:'安静排队发呆', effect:{mood:4}, result:`你放空大脑，让疲惫稍稍消散。`},
+  ]},
+  {title:'值日', text:`今天轮到你值日，李静也在检查卫生。`, choices:[
+    {t:'把教室打扫得一丝不苟', effect:{aff:{lijing:3}, stats:{jl:2}}, result:`李静检查完，难得对你点了点头：「很干净，辛苦了。」`},
+    {t:'喊同学一起干', effect:{stats:{ld:1,jj:2}}, result:`大家分工合作，很快把教室收拾得焕然一新。`},
+  ]},
+  {title:'雨天的伞', text:`放学突然下起了雨，你没带伞。`, choices:[
+    {t:'和同学挤一把伞回家', effect:{stats:{jj:2}}, result:`你们挤在同一把伞下，一路小跑，笑声不断。`},
+    {t:'干脆淋雨跑回家', effect:{stats:{tn:2}, mood:-2}, result:`你冲进雨里，虽然湿透了，却有种说不出的畅快。`},
+  ]},
+  {title:'小卖部', text:`课间，你冲进小卖部抢到了最后一瓶冰汽水。`, choices:[
+    {t:'自己独享', effect:{mood:3}, result:`你痛快地灌下一口，气泡在舌尖炸开，爽极了。`},
+    {t:'分给同学一起喝', effect:{stats:{jj:2}}, result:`你倒了几杯分给同学，收获了一波感谢。`},
+  ]},
+  {title:'自习课', text:`自习课上，教室里只有笔尖划过纸面的沙沙声。`, choices:[
+    {t:'专注刷题', effect:{stats:{xue:2}}, result:`你心无旁骛，刷完了一整页题。`},
+    {t:'偷偷看本闲书', effect:{stats:{wy:2}, mood:2}, result:`你低头看小说，嘴角不自觉上扬。`},
+  ]},
+  {title:'窗外', text:`你望着窗外发呆，看云慢慢飘过。`, choices:[
+    {t:'就这样放空一会儿', effect:{mood:4}, result:`你什么也不想，让青春在这片刻里慢下来。`},
+    {t:'趁机背几个单词', effect:{stats:{xue:1}}, result:`你收回目光，掏出单词本背了几个。`},
+  ]},
+  {title:'晨跑', text:`清晨的操场上，你和几个同学一起晨跑。`, choices:[
+    {t:'坚持跑完全程', effect:{stats:{tn:2}}, result:`你咬牙坚持，跑完后浑身通透。`},
+    {t:'慢跑着聊天', effect:{stats:{jj:1}}, result:`你放慢脚步，和旁边的同学聊了起来。`},
+  ]},
+  {title:'食堂新菜', text:`食堂出了新菜品，香气扑鼻。`, choices:[
+    {t:'抢先试吃', effect:{mood:3}, result:`你尝了一口，眼睛一亮，味道出乎意料地好。`},
+    {t:'帮室友带一份', effect:{stats:{jj:2}}, result:`你多打了一份，收获了一句真诚的谢谢。`},
+  ]},
+  {title:'停电', text:`晚自习突然停电，教室里一片惊呼。`, choices:[
+    {t:'打开手电筒维持秩序', effect:{stats:{ld:2}}, result:`你举着手机照明，大家渐渐安静下来。`},
+    {t:'起哄讲个鬼故事', effect:{stats:{ym:2}}, result:`你压低声音讲了起来，有人吓得连连后仰，笑成一片。`},
+  ]},
+  {title:'黑板报', text:`这期黑板报缺人手，宋秋正在发愁。`, choices:[
+    {t:'帮忙画画', effect:{aff:{songqiu:3}, stats:{wy:2}}, result:`你画得认真，宋秋在旁边连连赞叹：「你还会这个！」`},
+    {t:'帮忙写字', effect:{aff:{songqiu:3}, stats:{wc:2}}, result:`你字迹工整地写完，宋秋竖起了大拇指。`},
+  ]},
+  {title:'流浪猫', text:`你在校园里发现了一只流浪猫。`, choices:[
+    {t:'喂它一点食物', effect:{mood:4}, result:`小猫试探着靠近，吃完后围着你转圈。`},
+    {t:'拍下来发给秦阳看', effect:{aff:{qinyang:3}}, result:`秦阳秒回：「可爱！明天我们一起去喂它吧！」`},
+  ]},
+  {title:'篮球赛', text:`操场上有场班级篮球赛，张玄正带球突破。`, choices:[
+    {t:'上场加入', effect:{aff:{zhangxuan:3}, stats:{tn:2}}, result:`你冲上场，和张玄打出一个漂亮配合。`},
+    {t:'在场边卖力加油', effect:{stats:{jj:1}}, result:`你喊得嗓子都哑了，班里的士气也跟着高涨。`},
+  ]},
+  {title:'纸条', text:`有人从后面递来一张纸条。`, choices:[
+    {t:'回一句玩笑话', effect:{stats:{ym:2}}, result:`你写了句俏皮话传回去，后排笑成一片。`},
+    {t:'一笑置之', effect:{stats:{jl:1}}, result:`你把纸条收好，继续认真听讲。`},
+  ]},
+  {title:'流星', text:`据说今晚有流星雨，利普正组织大家去天台。`, choices:[
+    {t:'和利普一起去天台', effect:{aff:{lipu:3}, stats:{si:2}}, result:`流星划过时，利普轻声给你讲起了星座。`},
+    {t:'回家对着窗外许愿', effect:{mood:3}, result:`你望着夜空，把愿望悄悄藏在心底。`},
+  ]},
+  {title:'午睡', text:`午后的教室里，阳光暖洋洋的。`, choices:[
+    {t:'安心睡一觉', effect:{stamina:12}, result:`你沉沉睡去，醒来时精神焕发。`},
+    {t:'起来写会儿作业', effect:{stats:{xue:1}}, result:`你揉揉眼睛，把作业摊开，认真写了起来。`},
+  ]},
+  {title:'大扫除', text:`全校大扫除，大家忙得热火朝天。`, choices:[
+    {t:'主动揽下重活', effect:{stats:{tn:2}}, result:`你搬搬抬抬，出了一身汗，很有成就感。`},
+    {t:'认真完成分内事', effect:{stats:{jl:2}}, result:`你把自己的区域打扫得一尘不染。`},
+  ]},
+  {title:'数学难题', text:`一道数学难题卡住了你。`, choices:[
+    {t:'自己死磕到底', effect:{stats:{si:2}}, result:`你反复推演，解出来的那一刻畅快极了。`},
+    {t:'去请教阿杰', effect:{aff:{ajie:3}, stats:{si:1}}, result:`阿杰三言两语点破关键，你豁然开朗。`},
+  ]},
+  {title:'旧书店', text:`周末，你在学校附近的旧书店淘书。`, choices:[
+    {t:'买下那本喜欢的书', effect:{stats:{wy:2}}, result:`你抱着书走出店门，像抱住了整个周末。`},
+    {t:'约珂珂一起来挑', effect:{aff:{keke:3}}, result:`珂珂眼睛发亮地穿梭在书架间，给你推荐了好几本。`},
+  ]},
+  {title:'樱花', text:`春天，校园里的樱花开了。`, choices:[
+    {t:'站在树下静静看', effect:{mood:4}, result:`花瓣落在肩头，像是青春给的一个吻。`},
+    {t:'约人一起拍照', effect:{stats:{jj:1}}, result:`你招呼同学一起合影，定格下这个春天。`},
+  ]},
+  {title:'蝉鸣', text:`盛夏的午后，蝉鸣阵阵。`, choices:[
+    {t:'趴在桌上听蝉鸣', effect:{mood:3}, result:`你昏昏欲睡，被一声下课铃惊醒。`},
+    {t:'打起精神学习', effect:{stats:{xue:1}}, result:`你拍拍脸，赶走困意，继续做题。`},
+  ]},
+  {title:'落叶', text:`秋天的落叶铺满了校道。`, choices:[
+    {t:'踩着沙沙的叶子走', effect:{mood:3}, result:`你一脚一脚地踩，心情莫名轻快。`},
+    {t:'捡一片做书签', effect:{stats:{wy:1}}, result:`你挑了一片最完整的叶子，夹进了课本。`},
+  ]},
+  {title:'初雪', text:`冬天第一场雪落下，同学们冲到窗边欢呼。`, choices:[
+    {t:'冲到窗边看雪', effect:{mood:4}, result:`你看着漫天的白，想起了一句诗。`},
+    {t:'约王雯一起看', effect:{aff:{wangwen:3}}, result:`王雯笑着说：「初雪要许愿哦。」`},
+  ]},
+  {title:'熬夜复习', text:`考试周前的深夜，你打着台灯复习。`, choices:[
+    {t:'再续一杯咖啡', effect:{stats:{xue:2}, stamina:-10}, result:`你熬到深夜，收获不小，但眼睛发酸。`},
+    {t:'见好就收，早点睡', effect:{stamina:12}, result:`你早早休息，第二天精神饱满。`},
+  ]},
+  {title:'课桌涂鸦', text:`你发现课桌角落有前辈留下的涂鸦。`, choices:[
+    {t:'在旁边补一句加油', effect:{mood:3}, result:`你写下「加油」，仿佛和陌生人有了一次隔空击掌。`},
+    {t:'把课桌擦干净', effect:{stats:{jl:1}}, result:`你把桌面擦得一尘不染，看着很清爽。`},
+  ]},
+  {title:'饮水机', text:`课间饮水机前排起了长队。`, choices:[
+    {t:'排队时闲聊几句', effect:{stats:{jj:1}}, result:`你和旁边的人聊了几句，时间过得很快。`},
+    {t:'安静等着', effect:{mood:2}, result:`你安静排队，接满水后从容离开。`},
+  ]},
+  {title:'广播体操', text:`大课间的广播体操，全班站满了操场。`, choices:[
+    {t:'认真做标准动作', effect:{stats:{tn:1}}, result:`你动作标准，体育老师多看了你一眼。`},
+    {t:'偷偷划水', effect:{mood:2}, result:`你跟着比划两下，倒也轻松自在。`},
+  ]},
+  {title:'遗失的笔记本', text:`你捡到一本笔记本，翻了几页想找失主。`, choices:[
+    {t:'几经周折物归原主', effect:{stats:{jl:2}}, result:`失主连声道谢，你笑着摆手。`},
+    {t:'好奇地多看几页', effect:{stats:{si:1}}, result:`你发现里面记满了工整的笔记，暗暗佩服。`},
+  ]},
+  {title:'转学生', text:`班上来了个转学生，自我介绍时有些紧张。`, choices:[
+    {t:'带头鼓掌欢迎', effect:{stats:{jj:2}}, result:`你带头鼓掌，教室里响起一片掌声，转学生红了脸。`},
+    {t:'课后主动搭话', effect:{stats:{jj:2}}, result:`你主动介绍自己，很快和新同学熟络起来。`},
+  ]},
+  {title:'社团海报', text:`走廊贴满了社团招新的海报。`, choices:[
+    {t:'驻足细细欣赏', effect:{mood:2}, result:`你一张张看过去，色彩斑斓，像极了青春的野心。`},
+    {t:'报名感兴趣的社团', effect:{stats:{jj:2}}, result:`你在报名表上郑重写下了自己的名字。`},
+  ]},
+  {title:'天台的风', text:`你爬上无人的天台吹风。`, choices:[
+    {t:'独自享受这份宁静', effect:{mood:4}, result:`你看云被夕阳一点点染红，心也安静下来。`},
+    {t:'约朋友一起来', effect:{stats:{jj:1}}, result:`你们靠着栏杆聊天，笑声飘进风里。`},
+  ]},
+  {title:'走廊奔跑', text:`课间，你在走廊上小跑，差点和对面的人撞个满怀。`, choices:[
+    {t:'连忙道歉', effect:{stats:{jj:1}}, result:`你连声道歉，对方摆摆手，两人都笑了。`},
+    {t:'顺口开个玩笑', effect:{stats:{ym:1}}, result:`你打趣一句，气氛瞬间轻松起来。`},
+  ]},
+  {title:'自动贩卖机', text:`你投进硬币，自动贩卖机"咚"地掉出一罐饮料。`, choices:[
+    {t:'自己独享', effect:{mood:3}, result:`你拉开拉环，简单的小确幸。`},
+    {t:'多买一罐请同学', effect:{stats:{jj:2}}, result:`你把饮料递给同学，对方惊喜地接过。`},
+  ]},
+  {title:'旧书味', text:`图书馆里翻到一本旧书，书页间飘出淡淡的墨香。`, choices:[
+    {t:'坐下来读得入迷', effect:{stats:{si:2}}, result:`你一口气读了好一会儿，意犹未尽。`},
+    {t:'记下书名下次再读', effect:{stats:{wy:1}}, result:`你把书名抄在纸上，收进了口袋。`},
+  ]},
+  {title:'午休的吉他', text:`午休时，不知谁在教室后排轻轻弹着吉他。`, choices:[
+    {t:'安静地听完', effect:{mood:4}, result:`旋律温柔了整个中午，你听得入神。`},
+    {t:'跟着轻轻哼起来', effect:{stats:{wy:1}}, result:`你跟着哼，弹吉他的同学回头冲你一笑。`},
+  ]},
+  {title:'放学的夕阳', text:`放学路上，夕阳把影子拉得很长。`, choices:[
+    {t:'慢慢走回家', effect:{mood:3}, result:`你放慢脚步，享受这难得的悠闲。`},
+    {t:'和同学边走边聊', effect:{stats:{jj:1}}, result:`你们有一搭没一搭地聊着，路显得格外短。`},
+  ]},
+  {title:'一起回家', text:`你和同学顺路一起回家。`, choices:[
+    {t:'分享今天的趣事', effect:{stats:{jj:2}}, result:`你讲得眉飞色舞，同学笑得合不拢嘴。`},
+    {t:'一起讨论作业', effect:{stats:{xue:1}}, result:`你们边走边对答案，收获不小。`},
+  ]},
+  {title:'体育课', text:`体育课上，老师让大家跑三圈。`, choices:[
+    {t:'卯足劲跑在前头', effect:{aff:{liuhongshu:3}, stats:{tn:2}}, result:`你冲到前面，刘宏书追上来喊：「不错啊你！」`},
+    {t:'边跑边聊天', effect:{stats:{jj:1}}, result:`你放慢节奏，和旁边的同学有说有笑。`},
+  ]},
+  {title:'教师节', text:`教师节，全班准备给老师一个惊喜。`, choices:[
+    {t:'一起策划惊喜', effect:{stats:{jj:2,ld:1}}, result:`老师红了眼眶，说这是最棒的礼物。`},
+    {t:'认真写张贺卡', effect:{stats:{wc:2,wy:1}}, result:`你写下了满满的感谢，字字真诚。`},
+  ]},
+];
+
+/* 选择性事件池（分支抉择，选择各有效果） */
+const CHOICE_EVENTS = [
+  {text:`放学后，李静和利普几乎同时找到你。\n\n李静推了推眼镜：「一起把下周的值日方案定下来吧。」\n利普却递来一张天文社的邀请函：「今晚有流星雨，想一起去天台看吗？」`, bg:'corridor',
+    choices:[
+      {t:'和李静去值日', effect:{aff:{lijing:6}, stats:{jl:2}}, result:`你陪李静把值日表做得井井有条。她难得夸了你一句：「有你在，我轻松多了。」`},
+      {t:'和利普去看流星雨', effect:{aff:{lipu:6}, stats:{si:2}}, result:`流星划过夜空时，利普轻声说：「谢谢你愿意来。」你忽然觉得，星星都亮了。`},
+    ]},
+  {text:`你正和王昭在图书馆自习，手机突然震动——是田嘉的来电。\n\n王昭皱眉看了你一眼：「图书馆里，手机要静音。」`, char:'wangzhao', bg:'classroom',
+    choices:[
+      {t:'挂掉电话，继续自习', effect:{aff:{wangzhao:5}, stats:{jl:2}}, result:`你挂掉电话，朝王昭歉然一笑。他满意地点点头，把一道题推到你面前。`},
+      {t:'出去接田嘉的电话', effect:{aff:{tianjia:5}}, result:`你轻手轻脚走到走廊接通电话。田嘉说他在球场，问你要不要来。王昭隔着窗户，若有所思地看了你一眼。`},
+    ]},
+  {text:`狍子和崔凯因为一个恶作剧闹起了别扭，两人都来找你评理。`, bg:'corridor',
+    choices:[
+      {t:'帮狍子说话', effect:{aff:{paozi:6}, stats:{ym:2}}, result:`你替狍子圆了场，他感动得差点抱着你转圈。崔凯撇了撇嘴，但也没再计较。`},
+      {t:'帮崔凯说话', effect:{aff:{cuikai:6}, stats:{ym:2}}, result:`你帮崔凯解了围，他冲你竖大拇指：「还是你懂我！」狍子气鼓鼓地走了。`},
+      {t:'当和事佬', effect:{aff:{paozi:3,cuikai:3}, stats:{jj:3}}, result:`你拉着两人把话说开，最后三人笑成一团。`},
+    ]},
+  {text:`体育祭报名，体育委员刘宏书拿着报名表堵住了你：「还差个 1500 米，你来不来？」`, char:'liuhongshu', bg:'playground',
+    choices:[
+      {t:'报名 1500 米', effect:{aff:{liuhongshu:6}, stats:{tn:3}}, result:`你咬牙报名，刘宏书拍着你的肩：「好样的！我陪你练！」`},
+      {t:'报名啦啦队', effect:{stats:{jj:2}, mood:8}, result:`你选择当啦啦队，刘宏书有点失望，但也没强求。`},
+    ]},
+  {text:`考试前，孔菁偷偷找你：「我准备了一套小抄，你要不要也来一份？保证不被发现。」`, char:'kongjing', bg:'classroom',
+    choices:[
+      {t:'拒绝，并劝他别做', effect:{aff:{kongjing:4}, stats:{jl:3}}, result:`你正色拒绝，孔菁愣了愣，随后把小抄撕了：「你说得对，还是靠自己吧。」`},
+      {t:'收下小抄', effect:{stats:{xue:-3}, mood:-5}, result:`你收下了小抄，可心里一直不安，考试时也没敢用。`},
+    ]},
+  {text:`期中考前夜，你犹豫着要不要熬夜再刷一套题。`, bg:'classroom',
+    choices:[
+      {t:'熬夜刷题', effect:{stats:{xue:3}, stamina:-20}, result:`你熬到凌晨，眼睛发酸，但收获不小。`},
+      {t:'早点休息', effect:{stamina:25, mood:8}, result:`你早早睡下，第二天精神饱满地走进考场。`},
+    ]},
+  {text:`你在课桌里发现一封没有署名的告白信，字迹清秀。`, bg:'classroom',
+    choices:[
+      {t:'回一封信问个清楚', effect:{stats:{yy:2}}, result:`你写了回信，第二天课桌里多了一行小字：「放学天台见。」`},
+      {t:'当作没看见', effect:{}, result:`你把信轻轻放回原处，让它成为青春里一个温柔的秘密。`},
+    ]},
+  {text:`崔凯愁眉苦脸地找你：「我忘了带饭卡，能借我点钱吗？明天还你。」`, char:'cuikai', bg:'corridor',
+    choices:[
+      {t:'借给他', effect:{aff:{cuikai:6}, mood:5}, result:`你借了钱，崔凯感动得眼泪汪汪：「大恩不言谢！」`},
+      {t:'委婉拒绝', effect:{aff:{cuikai:-3}}, result:`你有点为难，崔凯摆摆手说没关系，自己去找别人了。`},
+    ]},
+  {text:`社团招新，文学社的珂珂和天文社的利普都在拉你入伙，两人目光灼灼。`, bg:'corridor',
+    choices:[
+      {t:'加入文学社', effect:{aff:{keke:6}, stats:{wc:3}}, result:`你在文学社报了名，珂珂笑盈盈地说：「以后一起写东西呀。」`},
+      {t:'加入天文社', effect:{aff:{lipu:6}, stats:{si:2}}, result:`你加入了天文社，利普认真地把社徽别在你胸前。`},
+      {t:'两个都不加，专心学习', effect:{stats:{xue:3}}, result:`你婉拒了两人，把时间留给了学习。`},
+    ]},
+  {text:`放学突降大雨，你没带伞。王雯举着伞走了过来：「一起走吧。」这时秦阳也撑着伞从另一头冒出来。`, bg:'corridor',
+    choices:[
+      {t:'和王雯一起走', effect:{aff:{wangwen:6}}, result:`伞不大，你们靠得很近。王雯身上的淡香混着雨水的味道，很好闻。`},
+      {t:'和秦阳一起走', effect:{aff:{qinyang:6}}, result:`秦阳把伞往你这边倾了倾，自己的半边肩膀都淋湿了。`},
+    ]},
+  {text:`放学后，张玄和刘宏书都想拉你组队打球，但两边都缺人。`, bg:'playground',
+    choices:[
+      {t:'加入张玄这边', effect:{aff:{zhangxuan:6}, stats:{tn:2}}, result:`你配合张玄打出了一波漂亮的快攻，他和你击掌庆祝。`},
+      {t:'加入刘宏书这边', effect:{aff:{liuhongshu:6}, stats:{tn:2}}, result:`刘宏书扯着嗓子喊战术，赢了之后非说要请你喝水。`},
+    ]},
+  {text:`福克斯笑眯眯地拦住你：「玩个小游戏吧。我猜你口袋里有一枚硬币——猜对的话，你请我喝汽水；猜错，我请你。」`, char:'fukes', bg:'corridor',
+    choices:[
+      {t:'答应他', effect:{aff:{fukes:5}, mood:6}, result:`你翻遍口袋，果然没有硬币。福克斯得意地笑，却还是请你喝了汽水。`},
+      {t:'拒绝这个把戏', effect:{aff:{fukes:-2}, stats:{jl:2}}, result:`你摇摇头。福克斯耸耸肩：「无趣，不过……挺像你的风格。」`},
+    ]},
+  {text:`棋桌旁，大师和阿杰各执一方，都邀请你来观战。`, bg:'corridor',
+    choices:[
+      {t:'坐大师这边', effect:{aff:{dashi:5}, stats:{si:2}}, result:`大师落子如飞，时不时点你两句：「看，这一步就守住了。」`},
+      {t:'坐阿杰这边', effect:{aff:{ajie:5}}, result:`阿杰难得精神，指着棋盘低声说：「我教你一招，看这里。」`},
+    ]},
+  {text:`达芬在教室门口徘徊，看到你后眼睛一亮，又怯生生地缩了缩脖子。`, char:'dafen', bg:'corridor',
+    choices:[
+      {t:'主动过去问他', effect:{aff:{dafen:6}, stats:{jj:2}}, result:`你走过去，达芬松了口气：「我……我想请你帮我看下这篇论文。」`},
+      {t:'装作没看见', effect:{}, result:`你走开了。回头时，达芬又缩回了角落，像一只受惊的小动物。`},
+    ]},
+  {text:`学校要搬一批器材，大G一个人扛起了最重的箱子，向你投来询问的目光。`, char:'dag', bg:'playground',
+    choices:[
+      {t:'搭把手一起搬', effect:{aff:{dag:6}, stats:{tn:2}}, result:`你和大G一起把器材搬完，他朝你点点头：「够意思。」`},
+      {t:'去搬轻一点的', effect:{stats:{tn:1}}, result:`你搬了些较轻的箱子，大G没说什么，但看你的眼神淡了几分。`},
+    ]},
+  {text:`丁金波撸起袖子，眼睛发亮：「放学天台，敢不敢和我切磋一场？」`, char:'dingjinbo', bg:'playground',
+    choices:[
+      {t:'痛快应战', effect:{aff:{dingjinbo:6}, stats:{wl:3}}, result:`你们你来我往，打到最后都躺在地上喘气，却笑得格外畅快。`},
+      {t:'委婉推脱', effect:{aff:{dingjinbo:-2}}, result:`你推说改天，丁金波有点失落，但还是捶了你一拳：「那就说定了！」`},
+    ]},
+  {text:`校刊征稿，珂珂想请你帮她一起改一篇稿子，时间有点紧。`, char:'keke', bg:'classroom',
+    choices:[
+      {t:'留下来帮她改', effect:{aff:{keke:6}, stats:{wc:2}}, result:`你们字斟句酌到很晚。珂珂认真地说：「和你一起改稿，思路特别顺。」`},
+      {t:'说还有事要忙', effect:{aff:{keke:-2}}, result:`你匆匆离开。珂珂笑了笑，说没关系，一个人也能改。`},
+    ]},
+  {text:`秦阳捧着一盆快枯死的花找到你：「这盆花我养不活了，你……愿意帮我照顾它吗？」`, char:'qinyang', bg:'classroom',
+    choices:[
+      {t:'接过花', effect:{aff:{qinyang:6}, mood:6}, result:`你接过花，秦阳眼睛亮晶晶的：「太好了，它遇到你有救了。」`},
+      {t:'婉拒', effect:{}, result:`你说自己也不会养。秦阳有点失落，但还是笑着说没关系。`},
+    ]},
+  {text:`家政课，王雯把你拉到一边，递来一块还温热的曲奇：「刚出炉的，帮我尝尝味道？」`, char:'wangwen', bg:'classroom',
+    choices:[
+      {t:'尝尝并夸她', effect:{aff:{wangwen:6}, mood:5}, result:`你咬了一口，由衷夸赞。王雯笑得眼睛弯成月牙：「那以后常做给你吃。」`},
+      {t:'说不饿', effect:{aff:{wangwen:-2}}, result:`你摇了摇头。王雯"哦"了一声，把饼干收了回去，有些失落。`},
+    ]},
+  {text:`放学的巷子口，几个外校的混混拦住了你的路。这时教主从后面慢悠悠地走出来，站在你身旁。`, char:'jiaozhu', bg:'corridor',
+    choices:[
+      {t:'和他并肩面对', effect:{aff:{jiaozhu:6}, stats:{wl:2}}, result:`教主看了你一眼，嘴角一勾：「行，是条汉子。」那几个混混悻悻地走了。`},
+      {t:'劝他别冲动', effect:{aff:{jiaozhu:3}, stats:{jl:2}}, result:`你拉住教主，好言相劝。事情和平解决，教主却笑你「太老实」。`},
+    ]},
+];
+
+/* 补充更多抉择事件 */
+CHOICE_EVENTS.push(
+  {text:`宋秋抱着画板站在走廊：「学校要办画展，我缺个帮手，你愿意吗？」`, char:'songqiu', bg:'corridor',
+    choices:[
+      {t:'帮他布置画展', effect:{aff:{songqiu:6}, stats:{wy:2}}, result:`你们一起挂画、调灯光，宋秋认真地说：「你的眼光很好。」`},
+      {t:'帮他把画拿给评委', effect:{aff:{songqiu:4}, stats:{jj:2}}, result:`你跑前跑后，评委对他的画赞不绝口。`},
+    ]},
+  {text:`孔菁找你组队参加物理竞赛：「两个人，胜算更大。」`, char:'kongjing', bg:'classroom',
+    choices:[
+      {t:'和他组队', effect:{aff:{kongjing:6}, stats:{si:2}}, result:`你们熬夜备赛，配合默契，一路杀进决赛。`},
+      {t:'婉拒，自己复习', effect:{stats:{xue:2}}, result:`你选择了独自准备，孔菁表示理解。`},
+    ]},
+  {text:`大师在树下打坐，见你来了，睁开眼：「坐下，聊聊。」`, char:'dashi', bg:'playground',
+    choices:[
+      {t:'坐下听他讲道理', effect:{aff:{dashi:6}, mood:6}, result:`大师几句话让你茅塞顿开，心里通透了许多。`},
+      {t:'说自己还有事', effect:{}, result:`你匆匆离开。大师笑笑，又闭上了眼。`},
+    ]},
+  {text:`运动会接力赛缺人，刘宏书拉住你：「接力最后一棒，交给你了！」`, char:'liuhongshu', bg:'playground',
+    choices:[
+      {t:'接下最后一棒', effect:{aff:{liuhongshu:6}, stats:{tn:3}}, result:`你咬紧牙关冲过终点，全班欢呼，刘宏书把你举了起来。`},
+      {t:'让更有把握的人上', effect:{stats:{jj:2}}, result:`你推荐了别人，刘宏书点点头：「也行，团队最重要。」`},
+    ]},
+  {text:`你撞见有个女生在天台向田嘉告白。田嘉有些无措地看向你，似乎想让你帮忙解围。`, char:'tianjia', bg:'rooftop',
+    choices:[
+      {t:'装作路过帮他解围', effect:{aff:{tianjia:5}}, result:`你找了个借口把田嘉拉走。他松了口气：「谢了，欠你一次。」`},
+      {t:'悄悄躲起来不打扰', effect:{stats:{jl:1}}, result:`你轻手轻脚离开，把空间留给他们。`},
+    ]},
+  {text:`利普兴奋地跑来：「今晚有月食，社团的天文望远镜终于派上用场了！」`, char:'lipu', bg:'rooftop',
+    choices:[
+      {t:'和她一起观测', effect:{aff:{lipu:6}, stats:{si:2}}, result:`透过望远镜，你们一起见证了月亮被慢慢遮住又重现的奇妙时刻。`},
+      {t:'回去写观测报告', effect:{stats:{xue:2}}, result:`你认真记下数据，利普夸你细心。`},
+    ]},
+  {text:`周末，王雯问你有没有空，想让你陪她去挑份给朋友的生日礼物。`, char:'wangwen', bg:'corridor',
+    choices:[
+      {t:'爽快答应', effect:{aff:{wangwen:6}, mood:6}, result:`你们逛了一下午，有说有笑，王雯挑到了满意的礼物。`},
+      {t:'推荐她去某家店', effect:{aff:{wangwen:3}, stats:{jj:2}}, result:`你报了个店名，王雯眼睛一亮：「就听你的！」`},
+    ]},
+  {text:`珂珂要参加作文比赛，紧张得不行：「我……我能不能读给你听，帮我提提意见？」`, char:'keke', bg:'classroom',
+    choices:[
+      {t:'认真听并给建议', effect:{aff:{keke:6}, stats:{wc:2}}, result:`你听完提了几处建议，珂珂如获至宝，眼睛亮晶晶的。`},
+      {t:'鼓励她自信一点', effect:{aff:{keke:4}, mood:4}, result:`你拍拍她的肩：「你写得很好，别怕。」她重重点了点头。`},
+    ]},
+);
+
+/* 连锁剧情（多周连续小故事，选择可持续或中断） */
+const CHAINS = {
+  yingxin: [
+    {text:`迎新晚会临近，班长王昭找到你：「全班就差一个节目了，你来顶一下？」`, char:'wangzhao', bg:'classroom',
+      choices:[
+        {t:'答应唱歌', effect:{aff:{wangzhao:3}, stats:{wy:2}}, result:`你爽快应下。王昭松了口气：「那彩排时见。」`},
+        {t:'答应演小品', effect:{aff:{wangzhao:3}, stats:{ym:2}}, result:`你答应演小品。王昭点点头：「行，我给你找搭档。」`},
+      ]},
+    {text:`彩排时，你紧张得频频忘词，台下的王昭眉头越皱越紧。`, char:'wangzhao', bg:'classroom',
+      choices:[
+        {t:'自己加练到深夜', effect:{stats:{wy:2}, stamina:-8}, result:`你对着镜子练到深夜，终于找到了感觉。`},
+        {t:'向同学取经', effect:{stats:{jj:2}}, result:`你虚心请教，大家七嘴八舌地给你出主意。`},
+      ]},
+    {text:`正式演出那天，聚光灯打在你身上，台下坐满了人。`, bg:'corridor',
+      choices:[
+        {t:'深呼吸，自信登场', effect:{stats:{wy:2,jj:2}, mood:6}, result:`你渐入佳境，全场掌声雷动。王昭在后台朝你比了个大拇指。`},
+        {t:'把观众当白菜', effect:{stats:{ym:2}, mood:4}, result:`你豁出去了，反倒越演越放得开，台下笑声不断。`},
+      ]},
+  ],
+  xueyuanji: [
+    {text:`学园祭要到了，班级开会讨论摊位主题。`, bg:'classroom',
+      choices:[
+        {t:'提议开女仆咖啡厅', effect:{stats:{ld:2}}, result:`你的提议获得通过，大家兴奋地讨论起来。`},
+        {t:'提议开鬼屋', effect:{stats:{ym:2}}, result:`鬼屋的提议引发了热烈反响，不少人摩拳擦掌。`},
+        {t:'提议开旧书义卖', effect:{stats:{wy:2}}, result:`你提议开旧书义卖，得到了一致赞同。`},
+      ]},
+    {text:`筹备期，大家都忙得脚不沾地。`, bg:'corridor',
+      choices:[
+        {t:'负责布置场地', effect:{stats:{wy:2}, stamina:-6}, result:`你熬了几个晚上，把场地布置得漂漂亮亮。`},
+        {t:'负责采购物资', effect:{stats:{jj:2}}, result:`你跑前跑后，货比三家，省下不少经费。`},
+        {t:'负责宣传拉客', effect:{stats:{yy:2}}, result:`你卖力吆喝，嗓子都喊哑了，人气高涨。`},
+      ]},
+    {text:`学园祭当天，校园里人山人海。`, bg:'corridor',
+      choices:[
+        {t:'守在自己的摊位', effect:{stats:{jj:2}, mood:4}, result:`你们的摊位人气爆棚，忙得你汗流浃背。`},
+        {t:'抽空和同学逛一圈', effect:{mood:8}, result:`你拉着同学到处逛，玩得不亦乐乎。`},
+      ]},
+  ],
+  hesu: [
+    {text:`年级组织露营，到了分帐篷的时候。`, bg:'playground',
+      choices:[
+        {t:'和王昭一组', effect:{aff:{wangzhao:4}}, result:`王昭二话不说帮你搭好了帐篷，动作利落。`},
+        {t:'和秦阳一组', effect:{aff:{qinyang:4}}, result:`秦阳兴高采烈地拉你入组，还带了零食。`},
+      ]},
+    {text:`夜晚的篝火旁，大家围坐在一起唱歌。`, bg:'playground',
+      choices:[
+        {t:'鼓起勇气献唱一首', effect:{stats:{wy:2}, mood:6}, result:`你唱完，大家鼓掌起哄，气氛达到了顶点。`},
+        {t:'安静听大家唱', effect:{mood:5}, result:`你听着歌，看着火光，心里暖洋洋的。`},
+      ]},
+    {text:`深夜，营地熄灯后，有人悄悄约你去山顶看星星。`, bg:'rooftop',
+      choices:[
+        {t:'偷偷溜出去看星星', effect:{stats:{la:2}, mood:8}, result:`星空璀璨，你们并排躺着，谁都没说话，却都很安心。`},
+        {t:'老实回帐篷睡觉', effect:{stamina:15}, result:`你钻进睡袋，很快进入了梦乡。`},
+      ]},
+  ],
+  shenmi: [
+    {text:`你在鞋柜里发现一张没有署名的纸条，上面写着：「放学后，老教学楼天台见。」`, bg:'corridor',
+      choices:[
+        {t:'赴约去看看', effect:{stats:{jl:1}, mood:2}, result:`你带着好奇心，决定放学后去看看。`},
+        {t:'当作恶作剧不理', effect:{stats:{jl:2}}, endChain:true, result:`你把纸条丢进垃圾桶，不再理会。这件事很快被你淡忘了。`},
+      ]},
+    {text:`你来到老教学楼的天台，却只看到福克斯站在那里，笑得意味深长。`, char:'fukes', bg:'rooftop',
+      choices:[
+        {t:'问他想干什么', effect:{aff:{fukes:3}}, result:`福克斯摊手：「就想看看，你会不会来。」`},
+        {t:'转身要走', effect:{}, endChain:true, result:`你摇摇头要走，福克斯在身后喊：「开玩笑的啦！」`},
+      ]},
+    {text:`原来这是福克斯他们策划的一场「真心话大冒险」的玩笑。`, char:'fukes', bg:'corridor',
+      choices:[
+        {t:'笑着原谅他们', effect:{aff:{fukes:4}, stats:{ym:2}}, result:`你哈哈大笑，反倒把大家逗乐了。`},
+        {t:'将计就计反将一军', effect:{stats:{ym:2,jj:2}}, result:`你反手设了个局，把福克斯也整得哭笑不得。`},
+      ]},
+  ],
+  chongsan: [
+    {text:`升入高三，班主任把你叫到办公室，谈起了志愿和未来。`, bg:'classroom',
+      choices:[
+        {t:'坚定说出理想大学', effect:{stats:{xue:2,ld:1}}, result:`你目光坚定地报出目标，老师欣慰地点点头。`},
+        {t:'说自己还没想好', effect:{stats:{si:2}}, result:`你坦诚地说还在思考，老师耐心地帮你分析。`},
+      ]},
+    {text:`高三的压力越来越大，你常常学到深夜，也有点喘不过气。`, bg:'classroom',
+      choices:[
+        {t:'咬牙坚持，多刷一套题', effect:{stats:{xue:3}, stamina:-15}, result:`你逼自己再坚持一下，成绩稳步提升。`},
+        {t:'找朋友聊聊，放松一下', effect:{mood:10, stamina:10}, result:`你和朋友聊了很久，心里的石头轻了不少。`},
+      ]},
+    {text:`高考前的最后一个晚自习，全班都安静得有些肃穆。`, bg:'classroom',
+      choices:[
+        {t:'埋头做最后的复习', effect:{stats:{xue:3,si:2}}, result:`你争分夺秒，把错题又过了一遍。`},
+        {t:'环顾教室，记下这一刻', effect:{mood:8}, result:`你把每个人的样子记在心里，青春在这一刻定格。`},
+      ]},
+  ],
+  biye: [
+    {text:`毕业临近，同学们传着同学录，让彼此写下祝福。`, bg:'classroom',
+      choices:[
+        {t:'认真给每个人写祝福', effect:{stats:{jj:3}}, result:`你写得认真，每一句都是真心。`},
+        {t:'只给几个要好的写', effect:{stats:{jj:1}, mood:4}, result:`你给最要好的几人写了满满一页。`},
+      ]},
+    {text:`毕业照那天，大家都穿得整整齐齐，站满了台阶。`, bg:'playground',
+      choices:[
+        {t:'站在最中间笑得灿烂', effect:{mood:8, stats:{jj:2}}, result:`快门按下，你的笑容定格在最显眼的位置。`},
+        {t:'站在角落安静微笑', effect:{mood:4}, result:`你站在角落，静静看着这群朝夕相处的同学。`},
+      ]},
+    {text:`散伙饭上，大家举杯，有人笑着笑着就哭了。`, bg:'corridor',
+      choices:[
+        {t:'说一段心里话', effect:{stats:{yy:3}, mood:8}, result:`你站起来说了几句，有人红了眼眶，用力鼓掌。`},
+        {t:'和每个人碰杯', effect:{stats:{jj:3}}, result:`你端着饮料和每个人碰杯，把祝福都藏在杯子里。`},
+      ]},
+  ],
+  lijing: [
+    {text:`放学后，你看到李静一个人坐在教室里，盯着值日表发呆。`, char:'lijing', bg:'classroom',
+      choices:[
+        {t:'过去问她怎么了', effect:{aff:{lijing:4}}, result:`李静叹了口气：「当纪律委员，真的好累。」`},
+        {t:'悄悄坐过去陪她', effect:{aff:{lijing:3}, mood:3}, result:`你默默坐下。过了会儿，李静轻声说：「谢谢。」`},
+      ]},
+    {text:`李静向你倾诉：大家总嫌她管得严，其实她也不想得罪人。`, char:'lijing', bg:'classroom',
+      choices:[
+        {t:'帮她出主意', effect:{aff:{lijing:5}, stats:{ld:2}}, result:`你帮她想了几个柔和的法子，李静眼睛渐渐亮起来。`},
+        {t:'认真听她说完', effect:{aff:{lijing:4}, mood:5}, result:`你安静听完，李静如释重负地笑了笑。`},
+      ]},
+    {text:`一段时间后，李静笑着告诉你，同学们不再那么抵触她了。`, char:'lijing', bg:'corridor',
+      choices:[
+        {t:'为她高兴', effect:{aff:{lijing:6}, mood:6}, result:`李静难得笑得轻松：「多亏了你。」`},
+        {t:'鼓励她继续加油', effect:{aff:{lijing:5}, stats:{ld:1}}, result:`你竖起大拇指，李静认真地点了点头。`},
+      ]},
+  ],
+  tianjia: [
+    {text:`田嘉最近总是一个人发呆，连球场都不怎么去了。`, char:'tianjia', bg:'corridor',
+      choices:[
+        {t:'问他是不是有心事', effect:{aff:{tianjia:4}}, result:`田嘉笑笑：「没什么，就是觉得……有点迷茫。」`},
+        {t:'拉他去打场球', effect:{aff:{tianjia:4}, stats:{tn:2}}, result:`你拉着他奔向球场，他眼里终于又有了光。`},
+      ]},
+    {text:`田嘉告诉你，家里人希望他走一条稳妥的路，但他更想追逐自己的梦想。`, char:'tianjia', bg:'rooftop',
+      choices:[
+        {t:'鼓励他坚持梦想', effect:{aff:{tianjia:5}}, result:`你认真地说：「我相信你。」田嘉深深看了你一眼。`},
+        {t:'帮他和家人沟通', effect:{aff:{tianjia:4}, stats:{jj:2}}, result:`你帮他出主意，他若有所思地点点头。`},
+      ]},
+    {text:`田嘉终于下定了决心，整个人都焕然一新。`, char:'tianjia', bg:'playground',
+      choices:[
+        {t:'为他加油', effect:{aff:{tianjia:6}, mood:6}, result:`田嘉朝你露出招牌式的笑：「以后，一起加油吧。」`},
+        {t:'约他再打一场球', effect:{aff:{tianjia:5}, stats:{tn:2}}, result:`你们在球场上尽情奔跑，青春的汗水闪闪发光。`},
+      ]},
+  ],
+};
+
+/* 连锁剧情的解锁门槛（minYear=起始学年；minAff=需要的好感度） */
+const CHAIN_GATE = {
+  chongsan: {minYear:3},
+  biye: {minYear:3},
+  lijing: {minYear:2, minAff:{lijing:35}},
+  tianjia: {minYear:2, minAff:{tianjia:35}},
+};
+
+/* 连锁剧情控制 */
+function startChain(id){
+  state.chain = {id, step:0};
+  showChainPart();
+}
+function showChainPart(){
+  const ch = state.chain;
+  if(!ch || !CHAINS[ch.id]){ state.chain=null; return; }
+  const part = CHAINS[ch.id][ch.step];
+  if(!part){ state.chain=null; return; }
+  showEvent({bg:part.bg||'corridor', char:part.char, text:part.text, choices:part.choices, chain:true});
+}
+
+/* =========================================================================
+   结局
+========================================================================= */
+function computeEnding(){
+  const a=state.player.attrs;
+  // 恋爱结局优先
+  if(state.flags.lover){
+    const c=BY_ID[state.flags.lover];
+    state.ending = {
+      icon:'💘', badge:'love', badgeLabel:'恋爱结局',
+      title:`与你共度青春 · ${c.name}`,
+      text:c.ending || `毕业后的某一天，你和${c.name}再次相遇，故事有了新的开始。`
+    };
+    return;
+  }
+  // 友情结局
+  if(state.bestFriend && af(state.bestFriend)>=70){
+    const c=BY_ID[state.bestFriend];
+    state.ending = {
+      icon:'🤝', badge:'friend', badgeLabel:'挚友结局',
+      title:`一辈子的好朋友 · ${c.name}`,
+      text:`虽然青春散场，但你与${c.name}的友情历久弥新。多年后，你们仍会为彼此赴汤蹈火。`
+    };
+    return;
+  }
+  // 高考结局
+  const score=Math.round((a.xue||0)*0.6+(a.si||0)*0.4);
+  let title,text,icon='🎓',badge='school',bl='学业结局';
+  if(score>=92){ title='圆梦顶尖学府'; text=`你以优异的成绩考入了心仪的顶尖学府。回望高中三年，每一滴汗水都值得。未来的舞台，正缓缓展开。`; }
+  else if(score>=80){ title='考入理想大学'; text=`你如愿考上了一所理想的大学，开始了崭新的大学生活。青春的故事，未完待续。`; }
+  else if(score>=65){ title='平平淡淡也是真'; text=`你进入了一所普通的大学，但人生从来不是一场考试决定的。属于你的精彩，还在后面。`; }
+  else { title='另辟蹊径'; text=`高考成绩不理想，但你并没有被打倒。你决定闯出属于自己的路，去更广阔的世界看一看。`; icon='🌱'; }
+  state.ending = {icon,badge,bl,title,text};
+}
+
+/* 告白逻辑 */
+function confess(cid){
+  const c=BY_ID[cid]; if(!c) return;
+  const a=state.player.attrs;
+  const aff=af(cid), la=a.la||0;
+  const success = aff>=80 || (aff>=70 && la>=70);
+  if(success){
+    state.flags.lover=cid;
+    state.log.unshift(`向${c.name}告白成功！`);
+    showEvent({bg:'rooftop', char:cid, text:c.confess||`「其实，我一直都喜欢你。」\n\n${c.name}笑了，那是你见过最好看的笑容。`, choices:[{t:'牵手',next:'lover-end'}]});
+  }else{
+    addAff(cid, -5);
+    state.log.unshift(`向${c.name}告白被拒绝了……`);
+    showEvent({bg:'rooftop', char:cid, text:`你鼓起勇气告白，${c.name}却慌乱地低下了头。\n\n「对不起……我还没想好。」\n\n你笑着摇了摇头，说没关系。`, choices:[{t:'继续前行',next:'after-event'}]});
+  }
+}
+
+/* =========================================================================
+   事件处理 (data-action)
+========================================================================= */
+const HANDLERS = {
+  'continue': ()=>{ load(); state.screen='game'; render(); },
+  'wipe': ()=>{ clearSave(); state=freshState(); render(); },
+  'newgame': ()=>{ state=freshState(); state.screen='name'; render(); },
+  'name-ok': ()=>{
+    const v=($('#nameInput')?.value||'').trim();
+    if(!v) return alert('请输入你的名字');
+    state.name=v; state.screen='gender'; render();
+  },
+  'gender-m': ()=>{ state.gender='m'; state.createStep='draft'; state.screen='draft'; render(); },
+  'gender-f': ()=>{ state.gender='f'; state.createStep='draft'; state.screen='draft'; render(); },
+  'draft-pick': (el)=>{
+    const d=state.draft, cid=el.dataset.cid, attr=el.dataset.attr;
+    if(d.picks[attr]) return; // 已选
+    if(!d.remaining.includes(attr)) return; // 已分配
+    const slot=d.round.find(r=>r.id===cid);
+    if(!slot) return;
+    const otherPicked = d.round.some(r=>r.id!==cid && r.picked===attr);
+    if(otherPicked) return; // 别人已选
+    if(slot.picked){ delete d.picks[slot.picked]; }
+    slot.picked=attr; d.picks[attr]=cid;
+    render();
+  },
+  'draft-reroll': ()=>{
+    const d=state.draft;
+    if(d.rerolls<=0) return;
+    d.rerolls--; d.round=pick(CHARACTERS,Math.min(3,d.remaining.length)).map(c=>({id:c.id,picked:null}));
+    render();
+  },
+  'draft-confirm': (el)=>{
+    const d=state.draft;
+    if(d.round.filter(r=>r.picked).length!==d.round.length) return;
+    d.round.forEach(r=>{
+      const c=BY_ID[r.id];
+      const k=r.picked;
+      const base = (c.attrs[k]||70)+rand(-2,2);
+      state.player.attrs[k] = Math.min(100, Math.max(40, base));
+      d.remaining = d.remaining.filter(x=>x!==k);
+    });
+    d.picks={}; d.round=[]; d.roundNo++;
+    render();
+  },
+  'do-action': (el)=>{
+    doAction(el.dataset.act);
+    if(state.screen!=='event') render();
+  },
+  'need-target': ()=>{ alert('请先选择约会对象（在主界面点击"选择约会对象"）。'); },
+  'set-date': ()=>{ state.dateScreen=true; state.screen='relations'; render(); },
+  'pick-date': ()=>{ state.dateScreen=true; state.screen='relations'; render(); },
+  'go-stats': ()=>{ state.screen='stats'; render(); },
+  'go-relations': ()=>{ state.screen='relations'; render(); },
+  'back-game': ()=>{ state.screen='game'; render(); },
+  'event-choice': (el)=>{
+    const evt=state.evt||{}; const i=+el.dataset.i;
+    const ch=(evt.choices||[])[i]||{next:'after-event'};
+    if(ch.act==='confess'){ confess(ch.cid||state.evt.target); return; }
+    if(ch.effect){ applyChoiceEvent(evt, ch); return; }
+    if(ch.next==='exam-result'){ examResult(); return; }
+    if(ch.next==='gaokao-result'){ gaokaoResult(); return; }
+    if(ch.next==='graduate'){ finishGame(); return; }
+    if(ch.next==='lover-end'){ finishGame(); return; }
+    // 默认 after-event
+    state.evt=null;
+    if(state.energy<=0){ state.screen='weekend'; }
+    else { state.screen='game'; }
+    render();
+  },
+  'next-week': ()=>{ advanceWeek(); },
+  'nav-game': ()=>{ state.screen='game'; render(); },
+  'nav-stats': ()=>{ state.screen='stats'; render(); },
+  'nav-relations': ()=>{ state.screen='relations'; render(); },
+  'nav-menu': ()=>menu(),
+};
+
+function menu(){
+  navEl().innerHTML='';
+  screen().innerHTML = `
+    ${hud()}
+    <div class="card fade" style="margin-top:30px;">
+      <h1 class="title">⚙️ 菜单</h1>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <button class="btn primary block" data-action="menu-save">💾 存档</button>
+        <button class="btn block" data-action="back-game">← 返回游戏</button>
+        <button class="btn ghost block" data-action="newgame">🔄 重新开始</button>
+      </div>
+    </div>`;
+  // 临时处理
+  window.__menuSave = ()=>{ save(); alert('已存档！'); };
+  window.__backGame = ()=>{ state.screen='game'; render(); };
+}
+function handleMenuAction(a){
+  if(a==='menu-save'){ save(); alert('已存档！'); }
+  else if(a==='back-game'){ state.screen='game'; render(); }
+  else if(a==='newgame'){ state=freshState(); state.screen='name'; render(); }
+}
+
+/* ---------- 事件委托 ---------- */
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const act = el.dataset.action;
+  // 约会对象选择：在关系界面点击人物卡片
+  if(act==='menu-save'){ save(); alert('已存档！'); return; }
+  const fn = HANDLERS[act];
+  if(fn) fn(el);
+});
+
+/* ---------- 关系界面点击选约会对象 ---------- */
+document.addEventListener('click', e=>{
+  const card = e.target.closest('[data-cid]');
+  if(!card) return;
+  const cid = card.dataset.cid;
+  const c = BY_ID[cid];
+  if(state.screen==='relations'){
+    if(state.dateScreen){
+      if(c.gender===state.gender || c.romance===false){ alert('约会对象需要是可攻略的异性同学哦。'); return; }
+      state.dateTarget=cid; state.dateScreen=false;
+      state.screen='game'; render();
+    } else if(state.dateTarget===cid){
+      // 点击已选约会对象，可选取消或约会
+      state.dateScreen=false;
+      alert(`${c.name} 已经是你的约会对象啦。`);
+    }
+  }
+});
+
+/* 给关系卡片加上 data-cid 以支持点击选约会对象 */
+const origRelations = renderRelations;
+renderRelations = function(){
+  const chars = [...CHARACTERS].sort((x,y)=>af(y.id)-af(x.id));
+  navEl().innerHTML = navBar('relations');
+  screen().innerHTML = `
+    ${hud()}
+    <div class="card fade">
+      <div class="between"><h1 class="title" style="font-size:18px;margin:0;">💕 人际关系</h1>
+        ${state.bestFriend?`<span class="chip">挚友：${BY_ID[state.bestFriend].name}</span>`:''}</div>
+      <p class="hint">${state.dateScreen?'👇 点击一位异性同学，作为约会对象。':'好感度越高，越容易触发专属剧情与结局。'}</p>
+    </div>
+    <div class="scroll">
+      ${chars.map(c=>{
+        const a=af(c.id);
+        const isRomance = c.gender!==state.gender && c.romance!==false;
+        const label = isRomance?'可攻略':'同窗';
+        return `<div class="card" data-cid="${c.id}" style="padding:12px;margin-bottom:10px;cursor:pointer;">
+          <div class="row">
+            <div class="avatar" style="width:46px;height:46px;border-radius:50%;overflow:hidden;flex:0 0 auto;border:2px solid ${isRomance?'var(--accent)':'var(--line)'};">${portraitSVG(c,46)}</div>
+            <div style="flex:1;">
+              <div class="between"><span class="hud-name" style="font-size:14px;">${c.name} <span class="prole" style="font-size:11px;color:var(--dim)">${c.role}</span></span>
+                <span class="small">${isRomance?'💘':(c.gender===state.gender?'🤝':'🤝')} ${label}</span></div>
+              <div class="row" style="margin-top:6px;"><span class="heart">♥</span><div class="aff-bar"><div class="fill" style="width:${a}%"></div></div><span class="small">${a}</span></div>
+            </div>
+          </div>
+          <p class="hint" style="margin:8px 0 0;">${c.desc}</p>
+        </div>`;
+      }).join('')}
+    </div>`;
+};
+
+/* ---------- 好友挚友更新 ---------- */
+function updateBestFriend(){
+  let best=null, bestV=0;
+  CHARACTERS.forEach(c=>{ if(af(c.id)>bestV && c.gender===state.gender){ bestV=af(c.id); best=c.id; } });
+  if(bestV>=50) state.bestFriend=best;
+}
+
+/* 钩子：好感度变化时更新挚友 */
+const origAddAff = addAff;
+addAff = function(id,n){
+  const cur=state.affection[id]||0;
+  state.affection[id]=Math.max(0,Math.min(100,cur+n));
+  if(state.bestFriend===null || !CHARACTERS.some(c=>c.id===id&&c.gender===state.gender)){
+    updateBestFriend();
+  }
+  updateBestFriend();
+};
+
+/* ---------- 启动 ---------- */
+load();
+if(!state) state=freshState();
+if(state.screen==='game' && !state.player.attrs || Object.keys(state.player.attrs||{}).length===0){ state.screen='name'; }
+render();
+</script>
+</body>
+</html>
